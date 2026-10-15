@@ -1,0 +1,23 @@
+{
+  "name": "qa-framework",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A framework that tests the supplied course applications.",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "test": "cross-env APP_ENV=dev playwright test",
+    "test:prod": "cross-env APP_ENV=prod playwright test",
+    "test:list": "cross-env APP_ENV=dev playwright test --list",
+    "typecheck": "tsc --noEmit",
+    "test:safety": "node --test \"safety/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "^24.19.2",
+    "cross-env": "^10.1.0",
+    "typescript": "^7.0.2"
+  }
+}
