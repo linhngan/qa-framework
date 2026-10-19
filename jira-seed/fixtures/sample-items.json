@@ -1,0 +1,7 @@
+{
+  "//": "Dry-run fixture: Jira pre-created two sample work items when the space was made. Expected: 2 placeholders (SCRUM-3, SCRUM-4) created and deleted, then SCRUM-5..162, all keys match; the samples stay.",
+  "existing": [
+    { "key": "SCRUM-1", "summary": "Task 1", "type": "Task", "parent": null },
+    { "key": "SCRUM-2", "summary": "Task 2", "type": "Task", "parent": null }
+  ]
+}

@@ -1,0 +1,953 @@
+{
+  "//": "Dry-run fixture: the seeder already ran once. Expected: 0 created, 158 reused, no placeholders, all keys match (idempotency).",
+  "existing": [
+    {
+      "key": "SCRUM-5",
+      "summary": "UI test automation: Playwright suite for the sandbox web app",
+      "type": "Epic",
+      "parent": null
+    },
+    {
+      "key": "SCRUM-9",
+      "summary": "Automate environment & navigation smoke (UI)",
+      "type": "Task",
+      "parent": "SCRUM-5"
+    },
+    {
+      "key": "SCRUM-108",
+      "summary": "TC-UI-001 — Environment banner shows DEVELOPMENT on the dev target",
+      "type": "Subtask",
+      "parent": "SCRUM-9"
+    },
+    {
+      "key": "SCRUM-109",
+      "summary": "TC-UI-003 — Anonymous nav shows login; authed links are absent",
+      "type": "Subtask",
+      "parent": "SCRUM-9"
+    },
+    {
+      "key": "SCRUM-110",
+      "summary": "TC-UI-004 — Authenticated nav shows dashboard/categories/account/logout; login absent",
+      "type": "Subtask",
+      "parent": "SCRUM-9"
+    },
+    {
+      "key": "SCRUM-10",
+      "summary": "Automate web login/logout & access control (UI)",
+      "type": "Task",
+      "parent": "SCRUM-5"
+    },
+    {
+      "key": "SCRUM-111",
+      "summary": "TC-UI-010 — Login succeeds with valid author credentials and reaches the dashboard",
+      "type": "Subtask",
+      "parent": "SCRUM-10"
+    },
+    {
+      "key": "SCRUM-112",
+      "summary": "TC-UI-011 — Login fails with a wrong password and shows login-error",
+      "type": "Subtask",
+      "parent": "SCRUM-10"
+    },
+    {
+      "key": "SCRUM-113",
+      "summary": "TC-UI-012 — Login fails with an unknown email without revealing the account",
+      "type": "Subtask",
+      "parent": "SCRUM-10"
+    },
+    {
+      "key": "SCRUM-114",
+      "summary": "TC-UI-013 — Logout ends the session and re-protects the dashboard",
+      "type": "Subtask",
+      "parent": "SCRUM-10"
+    },
+    {
+      "key": "SCRUM-115",
+      "summary": "TC-UI-014 — Protected pages redirect an anonymous visitor to /login",
+      "type": "Subtask",
+      "parent": "SCRUM-10"
+    },
+    {
+      "key": "SCRUM-11",
+      "summary": "Automate public blog list: listing, search, filter, pagination, empty state (UI)",
+      "type": "Task",
+      "parent": "SCRUM-5"
+    },
+    {
+      "key": "SCRUM-116",
+      "summary": "TC-UI-020 — Homepage lists published articles with author and category",
+      "type": "Subtask",
+      "parent": "SCRUM-11"
+    },
+    {
+      "key": "SCRUM-117",
+      "summary": "TC-UI-021 — A draft article never appears on the public list",
+      "type": "Subtask",
+      "parent": "SCRUM-11"
+    },
+    {
+      "key": "SCRUM-118",
+      "summary": "TC-UI-022 — Search filters the article list",
+      "type": "Subtask",
+      "parent": "SCRUM-11"
+    },
+    {
+      "key": "SCRUM-119",
+      "summary": "TC-UI-023 — A search with no matches shows the empty state",
+      "type": "Subtask",
+      "parent": "SCRUM-11"
+    },
+    {
+      "key": "SCRUM-120",
+      "summary": "TC-UI-024 — The category filter narrows the list to that category",
+      "type": "Subtask",
+      "parent": "SCRUM-11"
+    },
+    {
+      "key": "SCRUM-12",
+      "summary": "Automate article detail & async comments (UI)",
+      "type": "Task",
+      "parent": "SCRUM-5"
+    },
+    {
+      "key": "SCRUM-121",
+      "summary": "TC-UI-030 — Article page renders via slug navigation",
+      "type": "Subtask",
+      "parent": "SCRUM-12"
+    },
+    {
+      "key": "SCRUM-122",
+      "summary": "TC-UI-031 — Comments load asynchronously with no fixed timeouts",
+      "type": "Subtask",
+      "parent": "SCRUM-12"
+    },
+    {
+      "key": "SCRUM-123",
+      "summary": "TC-UI-032 — Posting a valid comment appends it and bumps the count",
+      "type": "Subtask",
+      "parent": "SCRUM-12"
+    },
+    {
+      "key": "SCRUM-124",
+      "summary": "TC-UI-033 — Comment validation: server rejects short input; a bad email is blocked natively",
+      "type": "Subtask",
+      "parent": "SCRUM-12"
+    },
+    {
+      "key": "SCRUM-13",
+      "summary": "Automate article lifecycle on the dashboard (UI, dev-only)",
+      "type": "Task",
+      "parent": "SCRUM-5"
+    },
+    {
+      "key": "SCRUM-125",
+      "summary": "TC-UI-040 — Author dashboard lists their own articles with a status",
+      "type": "Subtask",
+      "parent": "SCRUM-13"
+    },
+    {
+      "key": "SCRUM-126",
+      "summary": "TC-UI-041 — Author creates a published article via the form",
+      "type": "Subtask",
+      "parent": "SCRUM-13"
+    },
+    {
+      "key": "SCRUM-127",
+      "summary": "TC-UI-042 — Article form validation rejects a short title and short body",
+      "type": "Subtask",
+      "parent": "SCRUM-13"
+    },
+    {
+      "key": "SCRUM-128",
+      "summary": "TC-UI-043 — Author edits their own article and the change persists",
+      "type": "Subtask",
+      "parent": "SCRUM-13"
+    },
+    {
+      "key": "SCRUM-129",
+      "summary": "TC-UI-044 — Author deletes their own article (with confirm dialog)",
+      "type": "Subtask",
+      "parent": "SCRUM-13"
+    },
+    {
+      "key": "SCRUM-130",
+      "summary": "TC-UI-045 — A draft is hidden publicly until it is published",
+      "type": "Subtask",
+      "parent": "SCRUM-13"
+    },
+    {
+      "key": "SCRUM-131",
+      "summary": "TC-UI-046 — Admin sees every author's articles on the dashboard",
+      "type": "Subtask",
+      "parent": "SCRUM-13"
+    },
+    {
+      "key": "SCRUM-14",
+      "summary": "Automate categories & account settings (UI, dev-only)",
+      "type": "Task",
+      "parent": "SCRUM-5"
+    },
+    {
+      "key": "SCRUM-132",
+      "summary": "TC-UI-050 — An authenticated user creates a category",
+      "type": "Subtask",
+      "parent": "SCRUM-14"
+    },
+    {
+      "key": "SCRUM-133",
+      "summary": "TC-UI-051 — Category validation rejects a too-short name",
+      "type": "Subtask",
+      "parent": "SCRUM-14"
+    },
+    {
+      "key": "SCRUM-134",
+      "summary": "TC-UI-052 — Deleting an unused category removes it from the list",
+      "type": "Subtask",
+      "parent": "SCRUM-14"
+    },
+    {
+      "key": "SCRUM-135",
+      "summary": "TC-UI-060 — Account page shows the current profile",
+      "type": "Subtask",
+      "parent": "SCRUM-14"
+    },
+    {
+      "key": "SCRUM-136",
+      "summary": "TC-UI-061 — Updating the profile persists and confirms",
+      "type": "Subtask",
+      "parent": "SCRUM-14"
+    },
+    {
+      "key": "SCRUM-137",
+      "summary": "TC-UI-062 — Account validation rejects a short display name",
+      "type": "Subtask",
+      "parent": "SCRUM-14"
+    },
+    {
+      "key": "SCRUM-6",
+      "summary": "API test automation: request-level suite from the OpenAPI spec",
+      "type": "Epic",
+      "parent": null
+    },
+    {
+      "key": "SCRUM-15",
+      "summary": "Automate auth API incl. serialization & cookie regressions",
+      "type": "Task",
+      "parent": "SCRUM-6"
+    },
+    {
+      "key": "SCRUM-16",
+      "summary": "Automate articles API: listing rules incl. draft-leak regression",
+      "type": "Task",
+      "parent": "SCRUM-6"
+    },
+    {
+      "key": "SCRUM-138",
+      "summary": "TC-API-023 — Pagination bounds are rejected at the schema layer",
+      "type": "Subtask",
+      "parent": "SCRUM-16"
+    },
+    {
+      "key": "SCRUM-139",
+      "summary": "TC-API-024 — Search matches title OR body, case-insensitively",
+      "type": "Subtask",
+      "parent": "SCRUM-16"
+    },
+    {
+      "key": "SCRUM-140",
+      "summary": "TC-API-025 — The category filter takes a SLUG and narrows the list",
+      "type": "Subtask",
+      "parent": "SCRUM-16"
+    },
+    {
+      "key": "SCRUM-141",
+      "summary": "TC-API-070 — A draft article is readable by id without auth (list hides it, detail does not)",
+      "type": "Subtask",
+      "parent": "SCRUM-16"
+    },
+    {
+      "key": "SCRUM-142",
+      "summary": "TC-API-071 — An authenticated author sees every author's drafts, not just their own",
+      "type": "Subtask",
+      "parent": "SCRUM-16"
+    },
+    {
+      "key": "SCRUM-17",
+      "summary": "Automate articles API: CRUD + ownership matrix (dev-only writes)",
+      "type": "Task",
+      "parent": "SCRUM-6"
+    },
+    {
+      "key": "SCRUM-18",
+      "summary": "Automate categories, comments, users APIs",
+      "type": "Task",
+      "parent": "SCRUM-6"
+    },
+    {
+      "key": "SCRUM-143",
+      "summary": "TC-API-040 — GET comments returns the seeded thread; unknown article is 404",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-144",
+      "summary": "TC-API-041 — Posting a comment requires no auth and returns 201",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-145",
+      "summary": "TC-API-042 — The comments ?delay parameter is honoured and capped",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-146",
+      "summary": "TC-API-043 — Comment validation: short name, short body, over-long body, malformed email",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-147",
+      "summary": "TC-API-072 — DELETE comment authorizes on the ARTICLE's author, not the commenter",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-148",
+      "summary": "TC-API-060 — GET /api/users is admin-only: 401 anonymous, 403 author, 200 admin",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-149",
+      "summary": "TC-API-061 — GET /api/users/:id returns a public profile; unknown id is 404",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-150",
+      "summary": "TC-API-062 — PATCH /api/users/:id enforces owner-or-admin",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-151",
+      "summary": "TC-API-063 — The users payload never serializes password_hash",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-152",
+      "summary": "TC-API-064 — PATCH rejects a display_name under 2 characters with 422",
+      "type": "Subtask",
+      "parent": "SCRUM-18"
+    },
+    {
+      "key": "SCRUM-7",
+      "summary": "DB-layer verification and access-fence tests via Postgres MCP",
+      "type": "Epic",
+      "parent": null
+    },
+    {
+      "key": "SCRUM-19",
+      "summary": "Automate golden-seed integrity checks",
+      "type": "Task",
+      "parent": "SCRUM-7"
+    },
+    {
+      "key": "SCRUM-153",
+      "summary": "TC-DB-001 — Blog golden-seed shape is exact after reset",
+      "type": "Subtask",
+      "parent": "SCRUM-19"
+    },
+    {
+      "key": "SCRUM-154",
+      "summary": "TC-DB-002 — Blog seed referential integrity holds",
+      "type": "Subtask",
+      "parent": "SCRUM-19"
+    },
+    {
+      "key": "SCRUM-20",
+      "summary": "Automate data-layer verification behind app actions",
+      "type": "Task",
+      "parent": "SCRUM-7"
+    },
+    {
+      "key": "SCRUM-21",
+      "summary": "Automate the access fence incl. post-reset re-verification",
+      "type": "Task",
+      "parent": "SCRUM-7"
+    },
+    {
+      "key": "SCRUM-8",
+      "summary": "Suite operations: environments, gating, reporting, notifications",
+      "type": "Epic",
+      "parent": null
+    },
+    {
+      "key": "SCRUM-22",
+      "summary": "Environment gating & prod smoke profile",
+      "type": "Task",
+      "parent": "SCRUM-8"
+    },
+    {
+      "key": "SCRUM-23",
+      "summary": "Failure summary notifications (Slack) [Week 5]",
+      "type": "Task",
+      "parent": "SCRUM-8"
+    },
+    {
+      "key": "SCRUM-24",
+      "summary": "Test-result writeback [Week 5]",
+      "type": "Task",
+      "parent": "SCRUM-8"
+    },
+    {
+      "key": "SCRUM-25",
+      "summary": "Store UI automation: catalog → checkout → orders (Playwright + POM)",
+      "type": "Epic",
+      "parent": null
+    },
+    {
+      "key": "SCRUM-28",
+      "summary": "Automate store catalog: grid, filter/sort/search, sold-out badge, empty state (UI)",
+      "type": "Task",
+      "parent": "SCRUM-25"
+    },
+    {
+      "key": "SCRUM-45",
+      "summary": "TC-SUI-001 — grid renders product-cards (8) with image, name, price, stock badge",
+      "type": "Subtask",
+      "parent": "SCRUM-28"
+    },
+    {
+      "key": "SCRUM-46",
+      "summary": "TC-SUI-002 — a sold-out product shows the out-of-stock badge (water bottle)",
+      "type": "Subtask",
+      "parent": "SCRUM-28"
+    },
+    {
+      "key": "SCRUM-47",
+      "summary": "TC-SUI-003 — category filter narrows the grid; sort dropdown reorders; search narrows; empty search -> empty state",
+      "type": "Subtask",
+      "parent": "SCRUM-28"
+    },
+    {
+      "key": "SCRUM-48",
+      "summary": "TC-SUI-005 — clicking product-link -> product detail page (slug URL)",
+      "type": "Subtask",
+      "parent": "SCRUM-28"
+    },
+    {
+      "key": "SCRUM-155",
+      "summary": "TC-SUI-004 — The shop page shows the \"not a real store\" disclaimer",
+      "type": "Subtask",
+      "parent": "SCRUM-28"
+    },
+    {
+      "key": "SCRUM-156",
+      "summary": "TC-SUI-006 — The cart page shows the \"not a real store\" disclaimer",
+      "type": "Subtask",
+      "parent": "SCRUM-28"
+    },
+    {
+      "key": "SCRUM-157",
+      "summary": "TC-SUI-051 — Catalog toolbar: category filter, price sort, in-stock toggle, single-page grid",
+      "type": "Subtask",
+      "parent": "SCRUM-28"
+    },
+    {
+      "key": "SCRUM-29",
+      "summary": "Automate store product detail + add-to-cart: variants, stock (UI)",
+      "type": "Task",
+      "parent": "SCRUM-25"
+    },
+    {
+      "key": "SCRUM-49",
+      "summary": "TC-SUI-010 — renders image, title, price, description, variant-select, qty-input, add-to-cart",
+      "type": "Subtask",
+      "parent": "SCRUM-29"
+    },
+    {
+      "key": "SCRUM-50",
+      "summary": "TC-SUI-012 — add to cart -> cart reflects the item (nav cart count / cart page)",
+      "type": "Subtask",
+      "parent": "SCRUM-29"
+    },
+    {
+      "key": "SCRUM-30",
+      "summary": "Automate store cart + coupon math: update/remove/apply (UI)",
+      "type": "Task",
+      "parent": "SCRUM-25"
+    },
+    {
+      "key": "SCRUM-51",
+      "summary": "TC-SUI-020 — line items show image, name, variant, qty, line total; subtotal correct",
+      "type": "Subtask",
+      "parent": "SCRUM-30"
+    },
+    {
+      "key": "SCRUM-52",
+      "summary": "TC-SUI-022 — apply SAVE10 -> discount row appears; total updates; invalid code -> coupon-error",
+      "type": "Subtask",
+      "parent": "SCRUM-30"
+    },
+    {
+      "key": "SCRUM-31",
+      "summary": "Automate store checkout flow + payment paths: approved/declined (UI)",
+      "type": "Task",
+      "parent": "SCRUM-25"
+    },
+    {
+      "key": "SCRUM-53",
+      "summary": "TC-SUI-030 — shipping + payment forms render; the test-card panel is visible; fields aligned",
+      "type": "Subtask",
+      "parent": "SCRUM-31"
+    },
+    {
+      "key": "SCRUM-54",
+      "summary": "TC-SUI-031 — place order with 4242 -> order confirmation (order number, total, status paid)",
+      "type": "Subtask",
+      "parent": "SCRUM-31"
+    },
+    {
+      "key": "SCRUM-55",
+      "summary": "TC-SUI-032 — declined card 4000…0002 -> error shown, no confirmation",
+      "type": "Subtask",
+      "parent": "SCRUM-31"
+    },
+    {
+      "key": "SCRUM-32",
+      "summary": "Automate store order confirmation + history (UI)",
+      "type": "Task",
+      "parent": "SCRUM-25"
+    },
+    {
+      "key": "SCRUM-56",
+      "summary": "TC-SUI-040 — confirmation shows order-number, items, order-total, status paid",
+      "type": "Subtask",
+      "parent": "SCRUM-32"
+    },
+    {
+      "key": "SCRUM-158",
+      "summary": "TC-SUI-050 — Order history: login required, and a paid order appears",
+      "type": "Subtask",
+      "parent": "SCRUM-32"
+    },
+    {
+      "key": "SCRUM-26",
+      "summary": "Store API automation: products/cart/coupon/checkout/payment/orders",
+      "type": "Epic",
+      "parent": null
+    },
+    {
+      "key": "SCRUM-33",
+      "summary": "Automate store products API: listing/filter/sort/paginate/detail",
+      "type": "Task",
+      "parent": "SCRUM-26"
+    },
+    {
+      "key": "SCRUM-57",
+      "summary": "TC-SAPI-001 — GET /api/products -> 200; envelope {items,page,pageSize,total,totalPages}; total=8; pageSize=12; active only",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-58",
+      "summary": "TC-SAPI-002 — ?search=hoodie narrows by name/description (1 match)",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-59",
+      "summary": "TC-SAPI-003 — ?category=apparel returns only apparel; enum validated (bad category -> 400)",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-60",
+      "summary": "TC-SAPI-004 — ?sort=price_asc/price_desc/name/newest order correctly (assert first item)",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-61",
+      "summary": "TC-SAPI-005 — ?min_price=1500&max_price=2500 filters by cents range",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-62",
+      "summary": "TC-SAPI-006 — ?in_stock=true excludes the fully-out-of-stock product (water bottle absent)",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-63",
+      "summary": "TC-SAPI-007 — pagination: ?page=2&pageSize=3 slices; pageSize=51 clamped to 50; page=0 rejected",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-64",
+      "summary": "TC-SAPI-008 — ?delay=1500 adds latency, identical data, capped",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-65",
+      "summary": "TC-SAPI-009 — GET /api/products/codemify-classic-tee -> 200; product + variants[] (S/M/L/XL with stock)",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-66",
+      "summary": "TC-SAPI-010 — GET /api/products/does-not-exist -> 404 not_found",
+      "type": "Subtask",
+      "parent": "SCRUM-33"
+    },
+    {
+      "key": "SCRUM-34",
+      "summary": "Automate store cart API: items + out-of-stock",
+      "type": "Task",
+      "parent": "SCRUM-26"
+    },
+    {
+      "key": "SCRUM-67",
+      "summary": "TC-SAPI-020 — GET /api/cart (guest) -> 200; creates cart; sets cart_token httpOnly cookie; empty totals all 0",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-68",
+      "summary": "TC-SAPI-021 — POST /api/cart/items {variant_id,qty} -> 200; line added; subtotal_cents = qty×price",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-69",
+      "summary": "TC-SAPI-022 — add same variant twice -> qty bumps (one line, not duplicate)",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-70",
+      "summary": "TC-SAPI-023 — add qty > stock -> 422 cart_error",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-71",
+      "summary": "TC-SAPI-024 — add a sold-out variant (hoodie XL / water bottle) -> 422 out of stock",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-72",
+      "summary": "TC-SAPI-025 — PATCH /api/cart/items/:id {qty} updates; qty=0 removes the line",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-73",
+      "summary": "TC-SAPI-026 — PATCH qty above stock -> 422",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-74",
+      "summary": "TC-SAPI-027 — DELETE /api/cart/items/:id removes the line; totals recompute",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-75",
+      "summary": "TC-SAPI-028 — guest cart persists across requests via the cart_token cookie",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-76",
+      "summary": "TC-SAPI-029 — authenticated cart is keyed by user_id (Bearer/cookie), separate from a guest cart",
+      "type": "Subtask",
+      "parent": "SCRUM-34"
+    },
+    {
+      "key": "SCRUM-35",
+      "summary": "Automate store coupon math: SAVE10/WELCOME5/EXPIRED10/invalid",
+      "type": "Task",
+      "parent": "SCRUM-26"
+    },
+    {
+      "key": "SCRUM-77",
+      "summary": "TC-SAPI-030 — POST /api/cart/coupon {code:SAVE10} -> 10% off; subtotal 5000 -> discount 500, total 4500",
+      "type": "Subtask",
+      "parent": "SCRUM-35"
+    },
+    {
+      "key": "SCRUM-78",
+      "summary": "TC-SAPI-031 — WELCOME5 with subtotal < $25 -> 422 \"spend at least $25\"; with >= $25 -> $5 (500) off",
+      "type": "Subtask",
+      "parent": "SCRUM-35"
+    },
+    {
+      "key": "SCRUM-79",
+      "summary": "TC-SAPI-032 — EXPIRED10 -> 422 \"expired\"",
+      "type": "Subtask",
+      "parent": "SCRUM-35"
+    },
+    {
+      "key": "SCRUM-80",
+      "summary": "TC-SAPI-033 — unknown code -> 422 \"invalid coupon\"",
+      "type": "Subtask",
+      "parent": "SCRUM-35"
+    },
+    {
+      "key": "SCRUM-81",
+      "summary": "TC-SAPI-034 — empty code clears the coupon (discount back to 0)",
+      "type": "Subtask",
+      "parent": "SCRUM-35"
+    },
+    {
+      "key": "SCRUM-82",
+      "summary": "TC-SAPI-036 — coupon invalid after removing items below WELCOME5 min -> coupon_error set, discount 0",
+      "type": "Subtask",
+      "parent": "SCRUM-35"
+    },
+    {
+      "key": "SCRUM-159",
+      "summary": "TC-SAPI-072 — Coupon codes are normalised (lowercase and padded still apply)",
+      "type": "Subtask",
+      "parent": "SCRUM-35"
+    },
+    {
+      "key": "SCRUM-160",
+      "summary": "TC-SAPI-073 — A fixed coupon never exceeds the subtotal or drives the total negative",
+      "type": "Subtask",
+      "parent": "SCRUM-35"
+    },
+    {
+      "key": "SCRUM-36",
+      "summary": "Automate store checkout API + validation",
+      "type": "Task",
+      "parent": "SCRUM-26"
+    },
+    {
+      "key": "SCRUM-83",
+      "summary": "TC-SAPI-040 — POST /api/checkout (valid cart+email+shipping) -> 201 {order}; order_number CM-YYYY-######; status pending",
+      "type": "Subtask",
+      "parent": "SCRUM-36"
+    },
+    {
+      "key": "SCRUM-84",
+      "summary": "TC-SAPI-041 — validation: missing email/ship fields -> 422 with messages",
+      "type": "Subtask",
+      "parent": "SCRUM-36"
+    },
+    {
+      "key": "SCRUM-85",
+      "summary": "TC-SAPI-042 — empty cart -> 422 empty_cart",
+      "type": "Subtask",
+      "parent": "SCRUM-36"
+    },
+    {
+      "key": "SCRUM-86",
+      "summary": "TC-SAPI-043 — guest checkout (email, no auth) -> order user_id=null; authed -> user_id set",
+      "type": "Subtask",
+      "parent": "SCRUM-36"
+    },
+    {
+      "key": "SCRUM-87",
+      "summary": "TC-SAPI-044 — order items snapshot name + unit price + variant label at order time",
+      "type": "Subtask",
+      "parent": "SCRUM-36"
+    },
+    {
+      "key": "SCRUM-161",
+      "summary": "TC-SAPI-071 — An empty cart yields two different error codes depending on cause",
+      "type": "Subtask",
+      "parent": "SCRUM-36"
+    },
+    {
+      "key": "SCRUM-37",
+      "summary": "Automate mock-payment matrix + idempotency (approved/declined/error)",
+      "type": "Task",
+      "parent": "SCRUM-26"
+    },
+    {
+      "key": "SCRUM-88",
+      "summary": "TC-SAPI-050 — pay 4242 -> 200; order paid; payment approved; stock decremented; cart -> ordered",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-89",
+      "summary": "TC-SAPI-051 — pay 4000…0002 -> 402 payment_declined; order failed; stock unchanged",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-90",
+      "summary": "TC-SAPI-052 — pay 4000…0119 -> 502 gateway_error; order stays pending",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-91",
+      "summary": "TC-SAPI-053 — any undocumented card (even Luhn-valid) -> 422 card_invalid; no payment row written; order stays pending",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-92",
+      "summary": "TC-SAPI-054 — bad card format / past expiry / short CVV -> 422 card_invalid with messages",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-93",
+      "summary": "TC-SAPI-055 — idempotency: paying an already-paid order -> 200, existing payment, no double stock decrement",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-94",
+      "summary": "TC-SAPI-056 — pay a non-existent order id -> 404",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-95",
+      "summary": "TC-SAPI-057 — ?delay= on pay respected and capped",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-162",
+      "summary": "TC-SAPI-070 — The pay endpoint requires no authentication or ownership",
+      "type": "Subtask",
+      "parent": "SCRUM-37"
+    },
+    {
+      "key": "SCRUM-38",
+      "summary": "Automate store orders API + authz (owner-scoped access)",
+      "type": "Task",
+      "parent": "SCRUM-26"
+    },
+    {
+      "key": "SCRUM-96",
+      "summary": "TC-SAPI-060 — GET /api/orders (auth) -> 200; the user's orders; unauth -> 401",
+      "type": "Subtask",
+      "parent": "SCRUM-38"
+    },
+    {
+      "key": "SCRUM-97",
+      "summary": "TC-SAPI-061 — GET /api/orders/:id -> 200; order + items + payment",
+      "type": "Subtask",
+      "parent": "SCRUM-38"
+    },
+    {
+      "key": "SCRUM-98",
+      "summary": "TC-SAPI-062 — authz: another user fetching a user's order -> 403; owner/admin -> 200; guest order viewable by id",
+      "type": "Subtask",
+      "parent": "SCRUM-38"
+    },
+    {
+      "key": "SCRUM-99",
+      "summary": "TC-SAPI-063 — GET /api/orders/:id missing -> 404",
+      "type": "Subtask",
+      "parent": "SCRUM-38"
+    },
+    {
+      "key": "SCRUM-27",
+      "summary": "Store DB verification: seed integrity, stock-on-paid, access fence",
+      "type": "Epic",
+      "parent": null
+    },
+    {
+      "key": "SCRUM-39",
+      "summary": "Automate store seed integrity (8 products / 14 variants / 3 coupons + facts)",
+      "type": "Task",
+      "parent": "SCRUM-27"
+    },
+    {
+      "key": "SCRUM-42",
+      "summary": "TC-SDB-001 — seed counts: products=8, variants=14, coupons=3",
+      "type": "Subtask",
+      "parent": "SCRUM-39"
+    },
+    {
+      "key": "SCRUM-43",
+      "summary": "TC-SDB-002 — seed facts: tee=2500, hoodie XL sold out, water bottle sold out, EXPIRED10 past-dated",
+      "type": "Subtask",
+      "parent": "SCRUM-39"
+    },
+    {
+      "key": "SCRUM-44",
+      "summary": "TC-SDB-003 — referential integrity: no orphaned variants / order_items / payments",
+      "type": "Subtask",
+      "parent": "SCRUM-39"
+    },
+    {
+      "key": "SCRUM-40",
+      "summary": "Automate store data-layer: stock-decrement-on-paid, order/payment integrity",
+      "type": "Task",
+      "parent": "SCRUM-27"
+    },
+    {
+      "key": "SCRUM-100",
+      "summary": "TC-SDB-010 — stock decrement on paid: SELECT stock before, pay via API, SELECT after -> reduced by qty",
+      "type": "Subtask",
+      "parent": "SCRUM-40"
+    },
+    {
+      "key": "SCRUM-101",
+      "summary": "TC-SDB-011 — a paid order row: status=paid, total_cents = subtotal − discount, payments.status=approved",
+      "type": "Subtask",
+      "parent": "SCRUM-40"
+    },
+    {
+      "key": "SCRUM-102",
+      "summary": "TC-SDB-012 — order_items snapshot rows match the cart at checkout (name, qty, unit price)",
+      "type": "Subtask",
+      "parent": "SCRUM-40"
+    },
+    {
+      "key": "SCRUM-103",
+      "summary": "TC-SDB-013 — declined pay (4000…0002): order failed, payments.status=declined, stock unchanged",
+      "type": "Subtask",
+      "parent": "SCRUM-40"
+    },
+    {
+      "key": "SCRUM-104",
+      "summary": "TC-SDB-014 — set a variant stock=0 via SQL -> hidden from ?in_stock=true and blocks add-to-cart (restore after)",
+      "type": "Subtask",
+      "parent": "SCRUM-40"
+    },
+    {
+      "key": "SCRUM-41",
+      "summary": "Automate the access fence on store tables (qa_student CRUD, no DDL)",
+      "type": "Task",
+      "parent": "SCRUM-27"
+    },
+    {
+      "key": "SCRUM-105",
+      "summary": "TC-SDB-020 — qa_student full CRUD on all store tables (products…payments)",
+      "type": "Subtask",
+      "parent": "SCRUM-41"
+    },
+    {
+      "key": "SCRUM-106",
+      "summary": "TC-SDB-021 — DDL on store tables (DROP/ALTER/TRUNCATE) -> denied (extends verify-student-fence.sh)",
+      "type": "Subtask",
+      "parent": "SCRUM-41"
+    },
+    {
+      "key": "SCRUM-107",
+      "summary": "TC-SDB-022 — post-db:reset + apply-student-role.sh -> store-table grants still hold",
+      "type": "Subtask",
+      "parent": "SCRUM-41"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "//": "Dry-run fixture: a brand-new space with nothing in it. Expected: 4 placeholders created and deleted, then SCRUM-5..162 created, all keys match.",
+  "existing": []
+}
