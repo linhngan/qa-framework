@@ -17,6 +17,5 @@ test.describe('Blog home (dev smoke)', () => {
   test('first article card is visible and at least one card exists', async ({ page }) => {
     const cards = page.getByTestId('article-item');
     await expect(cards.first()).toBeVisible();
-    await expect(cards).not.toHaveCount(0);
   });
 });
