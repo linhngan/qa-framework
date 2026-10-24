@@ -1,0 +1,2182 @@
+{
+  "$schema": "./jira-seed.schema.json",
+  "version": "2026-09-16",
+  "project": {
+    "key": "SCRUM",
+    "name": "Agentic QA Automation — course backlog",
+    "type": "team-managed",
+    "template": "scrum"
+  },
+  "source": {
+    "site": "codemify-qa-ai.atlassian.net (the course's reference project)",
+    "snapshot": "2026-09-16",
+    "workItems": 158,
+    "keys": "SCRUM-5..162 on the source; SCRUM-1..4 were deleted template samples, so the seeder burns those four numbers",
+    "reconciled": [
+      "SCRUM-8 description: 'Zephyr result writeback' → 'case result writeback' (the course dropped Zephyr, BUILD-LOG 021)",
+      "SCRUM-24 summary/description: 'Zephyr execution writeback' → 'Test-result writeback' (same reason; the source project still carries the stale title)"
+    ]
+  },
+  "placeholders": {
+    "count": 4,
+    "why": "Jira never reuses a number. The source project's keys start at 5, so on an empty space four throwaway items are created and deleted first."
+  },
+  "epics": [
+    {
+      "courseKey": "SCRUM-5",
+      "summary": "UI test automation: Playwright suite for the sandbox web app",
+      "description": "**Description:** Build and maintain the Playwright UI suite covering environment identity, auth, public blog, article lifecycle, categories, and account settings, against dev (full) and prod (read-only smoke). Locators must use data-testid; mutating specs gated to dev via runIfEnv/envGuard.\n**Definition of done:** all P1/P2 UI cases automated, green on dev; prod smoke subset green; suites run headless in CI.",
+      "labels": [
+        "qa-automation",
+        "ui"
+      ],
+      "priority": "Medium",
+      "tasks": [
+        {
+          "courseKey": "SCRUM-9",
+          "summary": "Automate environment & navigation smoke (UI)",
+          "description": "**Description:** Verify the environment banner identifies dev vs prod, and navigation renders correctly for anonymous vs authenticated users.\n**Acceptance criteria:**\n\n* Banner asserts DEVELOPMENT on dev and PRODUCTION on prod (TC-UI-001, 002)\n* Anonymous nav shows login only; authed nav shows dashboard/categories/account/logout (TC-UI-003, 004)\n* Runs green in both APP_ENV modes; no mutations.\n  **Covers:** TC-UI-001..004",
+          "labels": [
+            "qa-automation",
+            "ui"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-UI-001",
+            "TC-UI-002",
+            "TC-UI-003",
+            "TC-UI-004"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-108",
+              "summary": "TC-UI-001 — Environment banner shows DEVELOPMENT on the dev target",
+              "description": "Automated: tests/blog/ui/ui-smoke.spec.ts. Asserts env-banner is visible and article cards render on the homepage. Runs dev + prod (banner text differs by APP_ENV). Tag: @smoke.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-001"
+            },
+            {
+              "courseKey": "SCRUM-109",
+              "summary": "TC-UI-003 — Anonymous nav shows login; authed links are absent",
+              "description": "Automated: tests/blog/ui/blog-auth-nav.spec.ts. Guest sees nav-home + nav-login; nav-dashboard, nav-logout, nav-account must not render. Read-only, runs dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-003"
+            },
+            {
+              "courseKey": "SCRUM-110",
+              "summary": "TC-UI-004 — Authenticated nav shows dashboard/categories/account/logout; login absent",
+              "description": "Automated: tests/blog/ui/blog-auth-nav.spec.ts. Uses the worker-scoped authedPage fixture. Read-only, runs dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-004"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-10",
+          "summary": "Automate web login/logout & access control (UI)",
+          "description": "**Description:** Cover the credential login flow, failure states, logout, and redirects on protected pages.\n**Acceptance criteria:**\n\n* Valid login lands on dashboard; wrong password and unknown email show login-error without revealing account existence (TC-UI-010..012)\n* Logout clears session; protected routes redirect anonymous users to /login (TC-UI-013, 014)\n  **Covers:** TC-UI-010..014",
+          "labels": [
+            "auth",
+            "qa-automation",
+            "ui"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-UI-010",
+            "TC-UI-011",
+            "TC-UI-012",
+            "TC-UI-013",
+            "TC-UI-014"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-111",
+              "summary": "TC-UI-010 — Login succeeds with valid author credentials and reaches the dashboard",
+              "description": "Automated: tests/blog/ui/ui-smoke.spec.ts and blog-auth-nav.spec.ts. Asserts dashboard-table renders after form login. Tag: @smoke.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-010"
+            },
+            {
+              "courseKey": "SCRUM-112",
+              "summary": "TC-UI-011 — Login fails with a wrong password and shows login-error",
+              "description": "Automated: tests/blog/ui/ui-smoke.spec.ts. Read-only, runs dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-011"
+            },
+            {
+              "courseKey": "SCRUM-113",
+              "summary": "TC-UI-012 — Login fails with an unknown email without revealing the account",
+              "description": "Automated: tests/blog/ui/blog-auth-nav.spec.ts. Asserts the error message does not disclose whether the email exists (no account enumeration). Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-012"
+            },
+            {
+              "courseKey": "SCRUM-114",
+              "summary": "TC-UI-013 — Logout ends the session and re-protects the dashboard",
+              "description": "Automated: tests/blog/ui/blog-auth-nav.spec.ts. After nav-logout the guest nav returns and /dashboard redirects to /login. Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-013"
+            },
+            {
+              "courseKey": "SCRUM-115",
+              "summary": "TC-UI-014 — Protected pages redirect an anonymous visitor to /login",
+              "description": "Automated: tests/blog/ui/blog-auth-nav.spec.ts. Covers /dashboard, /articles/new, /account, /categories. Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-014"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-11",
+          "summary": "Automate public blog list: listing, search, filter, pagination, empty state (UI)",
+          "description": "**Acceptance criteria:**\n\n* Published-only listing with correct card anatomy (TC-UI-020, 021)\n* Search narrows results and shows empty-state on no match (TC-UI-022, 023)\n* Category filter and pagination behave per spec (TC-UI-024, 025)\n  **Covers:** TC-UI-020..025",
+          "labels": [
+            "qa-automation",
+            "ui"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-UI-020",
+            "TC-UI-021",
+            "TC-UI-022",
+            "TC-UI-023",
+            "TC-UI-024",
+            "TC-UI-025"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-116",
+              "summary": "TC-UI-020 — Homepage lists published articles with author and category",
+              "description": "Automated: tests/blog/ui/ui-smoke.spec.ts. Asserts article-list and article-card render. Read-only, dev + prod. Tag: @smoke.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-020"
+            },
+            {
+              "courseKey": "SCRUM-117",
+              "summary": "TC-UI-021 — A draft article never appears on the public list",
+              "description": "Automated: tests/blog/ui/blog-list.spec.ts. The UI-side guard for the same privacy rule api-articles.spec.ts asserts at the API. Uses seeded draft article 7. Read-only, dev + prod. Tags: @smoke @regression.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-021"
+            },
+            {
+              "courseKey": "SCRUM-118",
+              "summary": "TC-UI-022 — Search filters the article list",
+              "description": "Automated: tests/blog/ui/ui-smoke.spec.ts. Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-022"
+            },
+            {
+              "courseKey": "SCRUM-119",
+              "summary": "TC-UI-023 — A search with no matches shows the empty state",
+              "description": "Automated: tests/blog/ui/blog-list.spec.ts. Asserts empty-state visible and zero article-card. Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-023"
+            },
+            {
+              "courseKey": "SCRUM-120",
+              "summary": "TC-UI-024 — The category filter narrows the list to that category",
+              "description": "Automated: tests/blog/ui/blog-list.spec.ts. Asserts EVERY rendered card carries the filtered category, not merely that some do. Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-024"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-12",
+          "summary": "Automate article detail & async comments (UI)",
+          "description": "**Description:** Article pages are slug-routed; the comments widget loads asynchronously and must be tested with data-based waits, never fixed timeouts.\n**Acceptance criteria:**\n\n* Slug navigation from list to detail (TC-UI-030)\n* Async comments render; loading state resolves (TC-UI-031)\n* Valid comment posts and increments count; invalid input rejected with messages (TC-UI-032, 033)\n* Optional: delay-param resilience case (TC-UI-034)\n  **Covers:** TC-UI-030..034",
+          "labels": [
+            "async",
+            "qa-automation",
+            "ui"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-UI-030",
+            "TC-UI-031",
+            "TC-UI-032",
+            "TC-UI-033",
+            "TC-UI-034"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-121",
+              "summary": "TC-UI-030 — Article page renders via slug navigation",
+              "description": "Automated: tests/blog/ui/ui-smoke.spec.ts. Navigates by clicking article-link as a user would. Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-030"
+            },
+            {
+              "courseKey": "SCRUM-122",
+              "summary": "TC-UI-031 — Comments load asynchronously with no fixed timeouts",
+              "description": "Automated: tests/blog/ui/ui-smoke.spec.ts. Waits on data (comment-count / comments-list), never waitForTimeout. Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-031"
+            },
+            {
+              "courseKey": "SCRUM-123",
+              "summary": "TC-UI-032 — Posting a valid comment appends it and bumps the count",
+              "description": "Automated: tests/blog/ui/blog-comments.spec.ts. Dev-only (creates a row); the comment is removed in afterEach so the shared seed does not drift.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-032"
+            },
+            {
+              "courseKey": "SCRUM-124",
+              "summary": "TC-UI-033 — Comment validation: server rejects short input; a bad email is blocked natively",
+              "description": "Automated: tests/blog/ui/blog-comments.spec.ts (two tests). Server rule: name >= 2, body >= 3 chars. Separately, comment-email is type=email so a malformed address is blocked by the browser and never reaches the server — asserted via validity.valid = false. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-033"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-13",
+          "summary": "Automate article lifecycle on the dashboard (UI, dev-only)",
+          "description": "**Acceptance criteria:**\n\n* Dashboard listing incl. status column and admin-sees-all (TC-UI-040, 046)\n* Create published article; edit own; delete own; draft workflow hidden→published (TC-UI-041, 043, 044, 045)\n* Form validation messages exact (TC-UI-042)\n* Entire spec gated with runIfEnv(['dev']); envGuard before mutations.\n  **Covers:** TC-UI-040..046",
+          "labels": [
+            "crud",
+            "qa-automation",
+            "ui"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-UI-040",
+            "TC-UI-041",
+            "TC-UI-042",
+            "TC-UI-043",
+            "TC-UI-044",
+            "TC-UI-045",
+            "TC-UI-046"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-125",
+              "summary": "TC-UI-040 — Author dashboard lists their own articles with a status",
+              "description": "Automated: tests/blog/ui/blog-dashboard.spec.ts. Asserts dashboard-table, at least one dashboard-row, and row-status is draft|published. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-040"
+            },
+            {
+              "courseKey": "SCRUM-126",
+              "summary": "TC-UI-041 — Author creates a published article via the form",
+              "description": "Automated: tests/blog/ui/blog-dashboard.spec.ts. Creates via article-form, asserts the dashboard row AND public visibility. Dev-only; namespaced title removed in afterEach.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-041"
+            },
+            {
+              "courseKey": "SCRUM-127",
+              "summary": "TC-UI-042 — Article form validation rejects a short title and short body",
+              "description": "Automated: tests/blog/ui/blog-dashboard.spec.ts. Asserts form-errors lists both messages (title >= 4, body >= 20) and nothing is saved. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-042"
+            },
+            {
+              "courseKey": "SCRUM-128",
+              "summary": "TC-UI-043 — Author edits their own article and the change persists",
+              "description": "Automated: tests/blog/ui/blog-dashboard.spec.ts. Dev-only; fixtures cleaned in afterEach.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-043"
+            },
+            {
+              "courseKey": "SCRUM-129",
+              "summary": "TC-UI-044 — Author deletes their own article (with confirm dialog)",
+              "description": "Automated: tests/blog/ui/blog-dashboard.spec.ts. Handles the browser confirm() before delete-btn; asserts the row disappears. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-044"
+            },
+            {
+              "courseKey": "SCRUM-130",
+              "summary": "TC-UI-045 — A draft is hidden publicly until it is published",
+              "description": "Automated: tests/blog/ui/blog-dashboard.spec.ts. Creates a draft, asserts it is absent from the public list, publishes it via the form, asserts it appears. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-045"
+            },
+            {
+              "courseKey": "SCRUM-131",
+              "summary": "TC-UI-046 — Admin sees every author's articles on the dashboard",
+              "description": "Automated: tests/blog/ui/blog-dashboard.spec.ts. Asserts the admin dashboard lists Leo's seeded draft, proving cross-author visibility. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-046"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-14",
+          "summary": "Automate categories & account settings (UI, dev-only)",
+          "description": "**Acceptance criteria:**\n\n* Category create/validate/delete incl. in-use behavior documented+asserted (TC-UI-050..052)\n* Account profile+address update persists; validation messages exact (TC-UI-060..062)\n  **Covers:** TC-UI-050..052, TC-UI-060..062",
+          "labels": [
+            "qa-automation",
+            "ui"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-UI-050",
+            "TC-UI-051",
+            "TC-UI-052",
+            "TC-UI-060",
+            "TC-UI-061",
+            "TC-UI-062"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-132",
+              "summary": "TC-UI-050 — An authenticated user creates a category",
+              "description": "Automated: tests/blog/ui/blog-account-categories.spec.ts. Dev-only; namespaced category removed via the API in afterEach.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-050"
+            },
+            {
+              "courseKey": "SCRUM-133",
+              "summary": "TC-UI-051 — Category validation rejects a too-short name",
+              "description": "Automated: tests/blog/ui/blog-account-categories.spec.ts. Name must be 2..60 chars. The \"nothing saved\" check is scoped to the attempted row, not an absolute list count, so it is safe under parallel runs. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-051"
+            },
+            {
+              "courseKey": "SCRUM-134",
+              "summary": "TC-UI-052 — Deleting an unused category removes it from the list",
+              "description": "Automated: tests/blog/ui/blog-account-categories.spec.ts. Handles the confirm() dialog. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-052"
+            },
+            {
+              "courseKey": "SCRUM-135",
+              "summary": "TC-UI-060 — Account page shows the current profile",
+              "description": "Automated: tests/blog/ui/ui-smoke.spec.ts. Uses the authedPage fixture; asserts account-form renders with a populated name. Read-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev-prod",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-060"
+            },
+            {
+              "courseKey": "SCRUM-136",
+              "summary": "TC-UI-061 — Updating the profile persists and confirms",
+              "description": "Automated: tests/blog/ui/blog-account-categories.spec.ts. Asserts account-saved appears AND the values survive a reload (the write really landed). Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-061"
+            },
+            {
+              "courseKey": "SCRUM-137",
+              "summary": "TC-UI-062 — Account validation rejects a short display name",
+              "description": "Automated: tests/blog/ui/blog-account-categories.spec.ts. display_name must be >= 2 chars; asserts account-errors. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "env-dev",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-UI-062"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "courseKey": "SCRUM-6",
+      "summary": "API test automation: request-level suite from the OpenAPI spec",
+      "description": "**Description:** Automate the REST API per /api/docs: meta, auth, articles, categories, comments, users. Assert status, shape, and meaning (authz matrix, validation, published-only rules). snake_case fields; wrapped create responses.\n**Definition of done:** all P1/P2 API cases automated; prod smoke subset read-only; regression cases for the two fixed bugs permanently in suite.",
+      "labels": [
+        "api",
+        "qa-automation"
+      ],
+      "priority": "Medium",
+      "tasks": [
+        {
+          "courseKey": "SCRUM-15",
+          "summary": "Automate auth API incl. serialization & cookie regressions",
+          "description": "**Acceptance criteria:**\n\n* Login happy path returns token AND fully-populated user object — guards the empty-user serialization bug (TC-API-010)\n* 401 paths for wrong password / unknown email / missing token on /me (TC-API-011, 012, 014)\n* /me returns the token's user (TC-API-013)\n* Set-Cookie flags: HttpOnly, SameSite=Lax, Secure only under https — guards the Secure-on-http prod login bug (TC-API-015)\n  **Covers:** TC-API-010..015",
+          "labels": [
+            "api",
+            "auth",
+            "qa-automation",
+            "regression"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-API-010",
+            "TC-API-011",
+            "TC-API-012",
+            "TC-API-013",
+            "TC-API-014",
+            "TC-API-015"
+          ],
+          "subtasks": []
+        },
+        {
+          "courseKey": "SCRUM-16",
+          "summary": "Automate articles API: listing rules incl. draft-leak regression",
+          "description": "**Acceptance criteria:**\n\n* Anonymous list is published-only; anonymous ?status=draft is force-overridden (TC-API-020, 021)\n* Authenticated draft listing works for the owner (TC-API-022)\n* Pagination bounds, search, category filters, 404 on missing id (TC-API-023..025)\n* Delay param respected and capped (TC-API-033)\n  **Covers:** TC-API-020..025, 033",
+          "labels": [
+            "api",
+            "qa-automation",
+            "regression"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-API-020",
+            "TC-API-021",
+            "TC-API-022",
+            "TC-API-023",
+            "TC-API-024",
+            "TC-API-025",
+            "TC-API-033"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-138",
+              "summary": "TC-API-023 — Pagination bounds are rejected at the schema layer",
+              "description": "Automated: tests/blog/api/api-articles-edge.spec.ts. pageSize is maximum:50 and page is minimum:1 in the Fastify querystring schema, so out-of-range values return 400 (NOT a silent clamp — the service-level Math.min is defence-in-depth this surface never reaches). Also asserts the boundary pageSize=50 is valid. Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-023"
+            },
+            {
+              "courseKey": "SCRUM-139",
+              "summary": "TC-API-024 — Search matches title OR body, case-insensitively",
+              "description": "Automated: tests/blog/api/api-articles-edge.spec.ts. Lower-cased term proves the ILIKE behaviour. Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-024"
+            },
+            {
+              "courseKey": "SCRUM-140",
+              "summary": "TC-API-025 — The category filter takes a SLUG and narrows the list",
+              "description": "Automated: tests/blog/api/api-articles-edge.spec.ts. ?category= expects the category slug (not id or name); asserts every returned item carries that category. Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-025"
+            },
+            {
+              "courseKey": "SCRUM-141",
+              "summary": "TC-API-070 — A draft article is readable by id without auth (list hides it, detail does not)",
+              "description": "Automated: tests/blog/api/api-articles-edge.spec.ts. PINS CURRENT BEHAVIOUR, which is arguably a defect: GET /api/articles force-overrides status to published for anonymous callers, but GET /api/articles/:id applies no status filter, so the seeded draft is fully readable by anyone who knows the id. See test-design/test-design-coverage-audit.md section 4, finding 1. If the app is hardened, this test must be updated deliberately. Read-only. Tag: @regression.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-070"
+            },
+            {
+              "courseKey": "SCRUM-142",
+              "summary": "TC-API-071 — An authenticated author sees every author's drafts, not just their own",
+              "description": "Automated: tests/blog/api/api-articles-edge.spec.ts. PINS CURRENT BEHAVIOUR: ?status=draft applies no author_id scoping, so Robin can read Leo's draft. See test-design/test-design-coverage-audit.md section 2b. Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-071"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-17",
+          "summary": "Automate articles API: CRUD + ownership matrix (dev-only writes)",
+          "description": "**Acceptance criteria:**\n\n* Create 201 wrapped response; validation messages exact; 401 unauthenticated (TC-API-026..028)\n* Ownership: 403 cross-author PATCH/DELETE; admin override allowed; delete→404 (TC-API-029..032)\n* Writes gated to dev.\n  **Covers:** TC-API-026..032",
+          "labels": [
+            "api",
+            "crud",
+            "qa-automation"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-API-026",
+            "TC-API-027",
+            "TC-API-028",
+            "TC-API-029",
+            "TC-API-030",
+            "TC-API-031",
+            "TC-API-032"
+          ],
+          "subtasks": []
+        },
+        {
+          "courseKey": "SCRUM-18",
+          "summary": "Automate categories, comments, users APIs",
+          "description": "**Acceptance criteria:**\n\n* Categories: list/create/duplicate/delete incl. in-use behavior (TC-API-040..043)\n* Comments: seeded GET, anonymous POST, validation, delete authz, delay (TC-API-050..054)\n* Users: admin-only list (200/403/401), self-vs-other GET/PATCH matrix (TC-API-060..064)\n  **Covers:** TC-API-040..043, 050..054, 060..064",
+          "labels": [
+            "api",
+            "qa-automation"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-API-040",
+            "TC-API-041",
+            "TC-API-042",
+            "TC-API-043",
+            "TC-API-050",
+            "TC-API-051",
+            "TC-API-052",
+            "TC-API-053",
+            "TC-API-054",
+            "TC-API-060",
+            "TC-API-061",
+            "TC-API-062",
+            "TC-API-063",
+            "TC-API-064"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-143",
+              "summary": "TC-API-040 — GET comments returns the seeded thread; unknown article is 404",
+              "description": "Automated: tests/blog/api/api-comments.spec.ts. Asserts the seeded commenters are present rather than an exact count (the thread is shared mutable state that the posting specs append to). Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-040"
+            },
+            {
+              "courseKey": "SCRUM-144",
+              "summary": "TC-API-041 — Posting a comment requires no auth and returns 201",
+              "description": "Automated: tests/blog/api/api-comments.spec.ts. Comments are deliberately public (no login). Dev-only; the created row is deleted afterwards.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-041"
+            },
+            {
+              "courseKey": "SCRUM-145",
+              "summary": "TC-API-042 — The comments ?delay parameter is honoured and capped",
+              "description": "Automated: tests/blog/api/api-comments.spec.ts. Proves waits are real without waitForTimeout. Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-042"
+            },
+            {
+              "courseKey": "SCRUM-146",
+              "summary": "TC-API-043 — Comment validation: short name, short body, over-long body, malformed email",
+              "description": "Automated: tests/blog/api/api-comments.spec.ts. Table-driven over all four rules (name >= 2, body 3..1000, email regex when supplied), asserting 422 validation_error and the specific message each time. Dev-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-043"
+            },
+            {
+              "courseKey": "SCRUM-147",
+              "summary": "TC-API-072 — DELETE comment authorizes on the ARTICLE's author, not the commenter",
+              "description": "Automated: tests/blog/api/api-comments.spec.ts. Comments carry no user link, so the rule is admin OR parent-article author. Asserts 401 anonymous, 403 for a different author, 200 for the article owner. Dev-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-072"
+            },
+            {
+              "courseKey": "SCRUM-148",
+              "summary": "TC-API-060 — GET /api/users is admin-only: 401 anonymous, 403 author, 200 admin",
+              "description": "Automated: tests/blog/api/api-users.spec.ts. Full authz matrix in one case, asserting the error codes (unauthorized / forbidden) not just statuses. Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-060"
+            },
+            {
+              "courseKey": "SCRUM-149",
+              "summary": "TC-API-061 — GET /api/users/:id returns a public profile; unknown id is 404",
+              "description": "Automated: tests/blog/api/api-users.spec.ts. Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-061"
+            },
+            {
+              "courseKey": "SCRUM-150",
+              "summary": "TC-API-062 — PATCH /api/users/:id enforces owner-or-admin",
+              "description": "Automated: tests/blog/api/api-users.spec.ts (two cases). Another user's profile 403, own profile 200, admin-on-anyone 200, and an unauthenticated PATCH 401. Dev-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-062"
+            },
+            {
+              "courseKey": "SCRUM-151",
+              "summary": "TC-API-063 — The users payload never serializes password_hash",
+              "description": "Automated: tests/blog/api/api-users.spec.ts. Asserted on both the admin list and the single-profile read — a privacy regression guard. Read-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev-prod"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-063"
+            },
+            {
+              "courseKey": "SCRUM-152",
+              "summary": "TC-API-064 — PATCH rejects a display_name under 2 characters with 422",
+              "description": "Automated: tests/blog/api/api-users.spec.ts. Dev-only.",
+              "labels": [
+                "api",
+                "automated",
+                "blog",
+                "env-dev"
+              ],
+              "priority": "Medium",
+              "tc": "TC-API-064"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "courseKey": "SCRUM-7",
+      "summary": "DB-layer verification and access-fence tests via Postgres MCP",
+      "description": "**Description:** Direct database checks with per-student restricted credentials: golden-seed integrity, data-layer verification behind UI/API actions, and the permission fence itself (role grants + MCP restricted mode).\n**Definition of done:** seed and fence suites automated; fence 12/12 after every reset; MCP-layer refusal demonstrated.",
+      "labels": [
+        "db",
+        "qa-automation"
+      ],
+      "priority": "Medium",
+      "tasks": [
+        {
+          "courseKey": "SCRUM-19",
+          "summary": "Automate golden-seed integrity checks",
+          "description": "**Acceptance criteria:** table counts and fixed facts assert exactly after reset (TC-DB-001); referential integrity holds (TC-DB-002).\n**Covers:** TC-DB-001, 002",
+          "labels": [
+            "db",
+            "qa-automation"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-DB-001",
+            "TC-DB-002"
+          ],
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-153",
+              "summary": "TC-DB-001 — Blog golden-seed shape is exact after reset",
+              "description": "Automated: tests/db/db-integrity.spec.ts (NEW DB layer, via pg). Asserts users=4, categories=4, articles=7 (6 published + 1 draft), plus the fixed facts every other suite hard-codes: article 1 slug, article 7 draft owned by Leo. Dev-only; skips cleanly without STUDENT_DATABASE_URL. Tag: @regression.",
+              "labels": [
+                "automated",
+                "blog",
+                "db",
+                "env-dev"
+              ],
+              "priority": "Medium",
+              "tc": "TC-DB-001"
+            },
+            {
+              "courseKey": "SCRUM-154",
+              "summary": "TC-DB-002 — Blog seed referential integrity holds",
+              "description": "Automated: tests/db/db-integrity.spec.ts. Every articles.author_id resolves to a user, every non-null category_id resolves, every comment hangs off a real article. Dev-only.",
+              "labels": [
+                "automated",
+                "blog",
+                "db",
+                "env-dev"
+              ],
+              "priority": "Medium",
+              "tc": "TC-DB-002"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-20",
+          "summary": "Automate data-layer verification behind app actions",
+          "description": "**Acceptance criteria:**\n\n* API-created article row verified by SELECT (TC-DB-010); UI comment persisted (TC-DB-011)\n* SQL draft-flip reflects in visibility, state restored (TC-DB-012)\n* Validation-bypass teaching case: short body inserts at DB, rejected by API (TC-DB-013); raw user insert not loginable (TC-DB-014)\n  **Covers:** TC-DB-010..014",
+          "labels": [
+            "db",
+            "qa-automation"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-DB-010",
+            "TC-DB-011",
+            "TC-DB-012",
+            "TC-DB-013",
+            "TC-DB-014"
+          ],
+          "subtasks": []
+        },
+        {
+          "courseKey": "SCRUM-21",
+          "summary": "Automate the access fence incl. post-reset re-verification",
+          "description": "**Acceptance criteria:**\n\n* verify-student-fence.sh 12/12 wired as an automated check (TC-DB-020..028)\n* Reset + apply-student-role.sh → fence still 12/12 (TC-DB-029)\n* MCP restricted mode refuses risky SQL before the DB layer (TC-DB-030); read queries match API ordering (TC-DB-031)\n  **Covers:** TC-DB-020..031",
+          "labels": [
+            "db",
+            "qa-automation",
+            "security"
+          ],
+          "priority": "Medium",
+          "tc": [
+            "TC-DB-020",
+            "TC-DB-021",
+            "TC-DB-022",
+            "TC-DB-023",
+            "TC-DB-024",
+            "TC-DB-025",
+            "TC-DB-026",
+            "TC-DB-027",
+            "TC-DB-028",
+            "TC-DB-029",
+            "TC-DB-030",
+            "TC-DB-031"
+          ],
+          "subtasks": []
+        }
+      ]
+    },
+    {
+      "courseKey": "SCRUM-8",
+      "summary": "Suite operations: environments, gating, reporting, notifications",
+      "description": "**Description:** Cross-cutting: env-driven config, dev/prod gating, HTML report/trace usage, failure summaries to Slack (Week 5), case result writeback (Week 5, human-approved).",
+      "labels": [
+        "ops",
+        "qa-automation"
+      ],
+      "priority": "Medium",
+      "tasks": [
+        {
+          "courseKey": "SCRUM-22",
+          "summary": "Environment gating & prod smoke profile",
+          "description": "**Acceptance criteria:** APP_ENV switches targets; mutating specs skip on prod (runIfEnv) and envGuard throws as second layer; documented prod smoke subset runs green.\n**Covers:** gating aspects of all dev-only cases",
+          "labels": [
+            "ops",
+            "qa-automation"
+          ],
+          "priority": "Medium",
+          "subtasks": []
+        },
+        {
+          "courseKey": "SCRUM-23",
+          "summary": "Failure summary notifications (Slack) [Week 5]",
+          "description": "**Acceptance criteria:** failed runs produce a human-readable summary from the real Playwright report (what/where/why/evidence link); posting to shared channels requires explicit approval.",
+          "labels": [
+            "ops",
+            "qa-automation"
+          ],
+          "priority": "Medium",
+          "subtasks": []
+        },
+        {
+          "courseKey": "SCRUM-24",
+          "summary": "Test-result writeback [Week 5]",
+          "description": "**Acceptance criteria:** results map test-case→execution status on the case sub-task; every writeback proposed and human-approved before posting; writebacks logged to the vault changelog.",
+          "labels": [
+            "ops",
+            "qa-automation"
+          ],
+          "priority": "Medium",
+          "subtasks": []
+        }
+      ]
+    },
+    {
+      "courseKey": "SCRUM-25",
+      "summary": "Store UI automation: catalog → checkout → orders (Playwright + POM)",
+      "description": "Playwright UI suite for the Codemify Store: catalog (grid/filter/sort/search/sold-out/empty), product detail + add-to-cart, cart + coupon math, checkout + payment paths (approved/declined), order confirmation + history. Answer-key ref: tests/store-ui/*, POMs CatalogPage/ProductPage/CartPage/CheckoutPage/OrdersPage. Maps to TC-SUI-* in store-test-cases.md.",
+      "labels": [
+        "qa-automation",
+        "store",
+        "ui"
+      ],
+      "priority": "Medium",
+      "tasks": [
+        {
+          "courseKey": "SCRUM-28",
+          "summary": "Automate store catalog: grid, filter/sort/search, sold-out badge, empty state (UI)",
+          "description": "TC-SUI-001..005. Answer-key ref: tests/store-ui/*, CatalogPage.",
+          "labels": [
+            "qa-automation",
+            "store",
+            "ui"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-45",
+              "summary": "TC-SUI-001 — grid renders product-cards (8) with image, name, price, stock badge",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev-prod",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-001"
+            },
+            {
+              "courseKey": "SCRUM-46",
+              "summary": "TC-SUI-002 — a sold-out product shows the out-of-stock badge (water bottle)",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev-prod",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-002"
+            },
+            {
+              "courseKey": "SCRUM-47",
+              "summary": "TC-SUI-003 — category filter narrows the grid; sort dropdown reorders; search narrows; empty search -> empty state",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev-prod",
+                "store",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SUI-003"
+            },
+            {
+              "courseKey": "SCRUM-48",
+              "summary": "TC-SUI-005 — clicking product-link -> product detail page (slug URL)",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev-prod",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-005"
+            },
+            {
+              "courseKey": "SCRUM-155",
+              "summary": "TC-SUI-004 — The shop page shows the \"not a real store\" disclaimer",
+              "description": "Automated: tests/store/ui/store-notice.spec.ts. Guards the test-store-notice partial on /shop. Read-only so it runs in BOTH dev and prod (the disclaimer is required in each). Tag: @smoke.",
+              "labels": [
+                "automated",
+                "env-dev-prod",
+                "store",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SUI-004"
+            },
+            {
+              "courseKey": "SCRUM-156",
+              "summary": "TC-SUI-006 — The cart page shows the \"not a real store\" disclaimer",
+              "description": "Automated: tests/store/ui/store-notice.spec.ts. Guards the test-store-notice partial on /cart. Read-only, dev + prod. Tag: @smoke.",
+              "labels": [
+                "automated",
+                "env-dev-prod",
+                "store",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SUI-006"
+            },
+            {
+              "courseKey": "SCRUM-157",
+              "summary": "TC-SUI-051 — Catalog toolbar: category filter, price sort, in-stock toggle, single-page grid",
+              "description": "Automated: tests/store/ui/store-catalog-filters.spec.ts (5 cases). Covers the toolbar beyond plain search. Note the pagination case asserts NO pagination controls render: the /shop route hardcodes pageSize=12 and ignores ?pageSize, and the seed ships 8 products, so one page is the correct rendering and a second page cannot be forced through the UI (no product-creation endpoint). Pagination logic itself is covered at the API layer by TC-SAPI-007. Read-only, dev + prod.",
+              "labels": [
+                "automated",
+                "env-dev-prod",
+                "store",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SUI-051"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-29",
+          "summary": "Automate store product detail + add-to-cart: variants, stock (UI)",
+          "description": "TC-SUI-010..013. Answer-key ref: tests/store-ui/*, ProductPage.",
+          "labels": [
+            "qa-automation",
+            "store",
+            "ui"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-49",
+              "summary": "TC-SUI-010 — renders image, title, price, description, variant-select, qty-input, add-to-cart",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev-prod",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-010"
+            },
+            {
+              "courseKey": "SCRUM-50",
+              "summary": "TC-SUI-012 — add to cart -> cart reflects the item (nav cart count / cart page)",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-012"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-30",
+          "summary": "Automate store cart + coupon math: update/remove/apply (UI)",
+          "description": "TC-SUI-020..023. Answer-key ref: tests/store-ui/*, CartPage.",
+          "labels": [
+            "coupon",
+            "qa-automation",
+            "store",
+            "ui"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-51",
+              "summary": "TC-SUI-020 — line items show image, name, variant, qty, line total; subtotal correct",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-020"
+            },
+            {
+              "courseKey": "SCRUM-52",
+              "summary": "TC-SUI-022 — apply SAVE10 -> discount row appears; total updates; invalid code -> coupon-error",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-022"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-31",
+          "summary": "Automate store checkout flow + payment paths: approved/declined (UI)",
+          "description": "TC-SUI-030..035. Answer-key ref: tests/store-ui/*, CheckoutPage.",
+          "labels": [
+            "payment",
+            "qa-automation",
+            "store",
+            "ui"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-53",
+              "summary": "TC-SUI-030 — shipping + payment forms render; the test-card panel is visible; fields aligned",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-030"
+            },
+            {
+              "courseKey": "SCRUM-54",
+              "summary": "TC-SUI-031 — place order with 4242 -> order confirmation (order number, total, status paid)",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-031"
+            },
+            {
+              "courseKey": "SCRUM-55",
+              "summary": "TC-SUI-032 — declined card 4000…0002 -> error shown, no confirmation",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev",
+                "store",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SUI-032"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-32",
+          "summary": "Automate store order confirmation + history (UI)",
+          "description": "TC-SUI-040, TC-SUI-050. Answer-key ref: tests/store-ui/*, OrdersPage.",
+          "labels": [
+            "qa-automation",
+            "store",
+            "ui"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-56",
+              "summary": "TC-SUI-040 — confirmation shows order-number, items, order-total, status paid",
+              "description": "",
+              "labels": [
+                "automated",
+                "env-dev",
+                "store",
+                "ui"
+              ],
+              "priority": "High",
+              "tc": "TC-SUI-040"
+            },
+            {
+              "courseKey": "SCRUM-158",
+              "summary": "TC-SUI-050 — Order history: login required, and a paid order appears",
+              "description": "Automated: tests/store/ui/store-orders.spec.ts (2 cases). /account/orders redirects a guest to /login; after a real approved checkout the order number appears in orders-table with status paid. Dev-only. NOTE: writing this found a latent bug in the pre-existing OrdersPage POM, which pointed at /orders (404) instead of /account/orders — it had no callers, so the error had never surfaced.",
+              "labels": [
+                "automated",
+                "env-dev",
+                "store",
+                "ui"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SUI-050"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "courseKey": "SCRUM-26",
+      "summary": "Store API automation: products/cart/coupon/checkout/payment/orders",
+      "description": "Request-level API suite from the store OpenAPI: products (listing/filter/sort/paginate/detail), cart (items + out-of-stock), coupon math (SAVE10/WELCOME5/EXPIRED10/invalid), checkout + validation, mock-payment matrix + idempotency, orders + authz. Answer-key ref: tests/store-products/*, store-cart/*, store-checkout/*. Maps to TC-SAPI-* in store-test-cases.md.",
+      "labels": [
+        "api",
+        "qa-automation",
+        "store"
+      ],
+      "priority": "Medium",
+      "tasks": [
+        {
+          "courseKey": "SCRUM-33",
+          "summary": "Automate store products API: listing/filter/sort/paginate/detail",
+          "description": "TC-SAPI-001..010. Answer-key ref: tests/store-products/*.",
+          "labels": [
+            "api",
+            "qa-automation",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-57",
+              "summary": "TC-SAPI-001 — GET /api/products -> 200; envelope {items,page,pageSize,total,totalPages}; total=8; pageSize=12; active only",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-001"
+            },
+            {
+              "courseKey": "SCRUM-58",
+              "summary": "TC-SAPI-002 — ?search=hoodie narrows by name/description (1 match)",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-002"
+            },
+            {
+              "courseKey": "SCRUM-59",
+              "summary": "TC-SAPI-003 — ?category=apparel returns only apparel; enum validated (bad category -> 400)",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-003"
+            },
+            {
+              "courseKey": "SCRUM-60",
+              "summary": "TC-SAPI-004 — ?sort=price_asc/price_desc/name/newest order correctly (assert first item)",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-004"
+            },
+            {
+              "courseKey": "SCRUM-61",
+              "summary": "TC-SAPI-005 — ?min_price=1500&max_price=2500 filters by cents range",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-005"
+            },
+            {
+              "courseKey": "SCRUM-62",
+              "summary": "TC-SAPI-006 — ?in_stock=true excludes the fully-out-of-stock product (water bottle absent)",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-006"
+            },
+            {
+              "courseKey": "SCRUM-63",
+              "summary": "TC-SAPI-007 — pagination: ?page=2&pageSize=3 slices; pageSize=51 clamped to 50; page=0 rejected",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-007"
+            },
+            {
+              "courseKey": "SCRUM-64",
+              "summary": "TC-SAPI-008 — ?delay=1500 adds latency, identical data, capped",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "Low",
+              "tc": "TC-SAPI-008"
+            },
+            {
+              "courseKey": "SCRUM-65",
+              "summary": "TC-SAPI-009 — GET /api/products/codemify-classic-tee -> 200; product + variants[] (S/M/L/XL with stock)",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-009"
+            },
+            {
+              "courseKey": "SCRUM-66",
+              "summary": "TC-SAPI-010 — GET /api/products/does-not-exist -> 404 not_found",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev-prod",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-010"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-34",
+          "summary": "Automate store cart API: items + out-of-stock",
+          "description": "TC-SAPI-020..029. Answer-key ref: tests/store-cart/*.",
+          "labels": [
+            "api",
+            "qa-automation",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-67",
+              "summary": "TC-SAPI-020 — GET /api/cart (guest) -> 200; creates cart; sets cart_token httpOnly cookie; empty totals all 0",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-020"
+            },
+            {
+              "courseKey": "SCRUM-68",
+              "summary": "TC-SAPI-021 — POST /api/cart/items {variant_id,qty} -> 200; line added; subtotal_cents = qty×price",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-021"
+            },
+            {
+              "courseKey": "SCRUM-69",
+              "summary": "TC-SAPI-022 — add same variant twice -> qty bumps (one line, not duplicate)",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-022"
+            },
+            {
+              "courseKey": "SCRUM-70",
+              "summary": "TC-SAPI-023 — add qty > stock -> 422 cart_error",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-023"
+            },
+            {
+              "courseKey": "SCRUM-71",
+              "summary": "TC-SAPI-024 — add a sold-out variant (hoodie XL / water bottle) -> 422 out of stock",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-024"
+            },
+            {
+              "courseKey": "SCRUM-72",
+              "summary": "TC-SAPI-025 — PATCH /api/cart/items/:id {qty} updates; qty=0 removes the line",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-025"
+            },
+            {
+              "courseKey": "SCRUM-73",
+              "summary": "TC-SAPI-026 — PATCH qty above stock -> 422",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-026"
+            },
+            {
+              "courseKey": "SCRUM-74",
+              "summary": "TC-SAPI-027 — DELETE /api/cart/items/:id removes the line; totals recompute",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-027"
+            },
+            {
+              "courseKey": "SCRUM-75",
+              "summary": "TC-SAPI-028 — guest cart persists across requests via the cart_token cookie",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-028"
+            },
+            {
+              "courseKey": "SCRUM-76",
+              "summary": "TC-SAPI-029 — authenticated cart is keyed by user_id (Bearer/cookie), separate from a guest cart",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-029"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-35",
+          "summary": "Automate store coupon math: SAVE10/WELCOME5/EXPIRED10/invalid",
+          "description": "TC-SAPI-030..036. Answer-key ref: tests/store-cart/* (coupon cases).",
+          "labels": [
+            "api",
+            "coupon",
+            "qa-automation",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-77",
+              "summary": "TC-SAPI-030 — POST /api/cart/coupon {code:SAVE10} -> 10% off; subtotal 5000 -> discount 500, total 4500",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-030"
+            },
+            {
+              "courseKey": "SCRUM-78",
+              "summary": "TC-SAPI-031 — WELCOME5 with subtotal < $25 -> 422 \"spend at least $25\"; with >= $25 -> $5 (500) off",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-031"
+            },
+            {
+              "courseKey": "SCRUM-79",
+              "summary": "TC-SAPI-032 — EXPIRED10 -> 422 \"expired\"",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-032"
+            },
+            {
+              "courseKey": "SCRUM-80",
+              "summary": "TC-SAPI-033 — unknown code -> 422 \"invalid coupon\"",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-033"
+            },
+            {
+              "courseKey": "SCRUM-81",
+              "summary": "TC-SAPI-034 — empty code clears the coupon (discount back to 0)",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-034"
+            },
+            {
+              "courseKey": "SCRUM-82",
+              "summary": "TC-SAPI-036 — coupon invalid after removing items below WELCOME5 min -> coupon_error set, discount 0",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-036"
+            },
+            {
+              "courseKey": "SCRUM-159",
+              "summary": "TC-SAPI-072 — Coupon codes are normalised (lowercase and padded still apply)",
+              "description": "Automated: tests/store/api/store-edge.spec.ts. lookupCoupon trims and upper-cases, so \"  save10  \" must apply as SAVE10 and be stored upper-cased. Dev-only.",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-072"
+            },
+            {
+              "courseKey": "SCRUM-160",
+              "summary": "TC-SAPI-073 — A fixed coupon never exceeds the subtotal or drives the total negative",
+              "description": "Automated: tests/store/api/store-edge.spec.ts. Below WELCOME5's $25 minimum the coupon is refused (422 coupon_error) rather than over-applied, and the cart total stays non-negative and equal to subtotal. Dev-only.",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-073"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-36",
+          "summary": "Automate store checkout API + validation",
+          "description": "TC-SAPI-040..044 (incl. Fastify schema 400 vs app 422). Answer-key ref: tests/store-checkout/*.",
+          "labels": [
+            "api",
+            "qa-automation",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-83",
+              "summary": "TC-SAPI-040 — POST /api/checkout (valid cart+email+shipping) -> 201 {order}; order_number CM-YYYY-######; status pending",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-040"
+            },
+            {
+              "courseKey": "SCRUM-84",
+              "summary": "TC-SAPI-041 — validation: missing email/ship fields -> 422 with messages",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-041"
+            },
+            {
+              "courseKey": "SCRUM-85",
+              "summary": "TC-SAPI-042 — empty cart -> 422 empty_cart",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-042"
+            },
+            {
+              "courseKey": "SCRUM-86",
+              "summary": "TC-SAPI-043 — guest checkout (email, no auth) -> order user_id=null; authed -> user_id set",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-043"
+            },
+            {
+              "courseKey": "SCRUM-87",
+              "summary": "TC-SAPI-044 — order items snapshot name + unit price + variant label at order time",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-044"
+            },
+            {
+              "courseKey": "SCRUM-161",
+              "summary": "TC-SAPI-071 — An empty cart yields two different error codes depending on cause",
+              "description": "Automated: tests/store/api/store-edge.spec.ts. No cart row at all returns error \"empty_cart\"; a cart row with zero lines returns \"checkout_error\" — same 422 and same human message (\"Your cart is empty.\"), different machine code. Clients keying off `error` must handle both. Dev-only.",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-071"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-37",
+          "summary": "Automate mock-payment matrix + idempotency (approved/declined/error)",
+          "description": "TC-SAPI-050..057. Luhn + test-card outcomes, idempotent pay, stock decrement on approved. Answer-key ref: tests/store-checkout/*.",
+          "labels": [
+            "api",
+            "payment",
+            "qa-automation",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-88",
+              "summary": "TC-SAPI-050 — pay 4242 -> 200; order paid; payment approved; stock decremented; cart -> ordered",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-050"
+            },
+            {
+              "courseKey": "SCRUM-89",
+              "summary": "TC-SAPI-051 — pay 4000…0002 -> 402 payment_declined; order failed; stock unchanged",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-051"
+            },
+            {
+              "courseKey": "SCRUM-90",
+              "summary": "TC-SAPI-052 — pay 4000…0119 -> 502 gateway_error; order stays pending",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-052"
+            },
+            {
+              "courseKey": "SCRUM-91",
+              "summary": "TC-SAPI-053 — any undocumented card (even Luhn-valid) -> 422 card_invalid; no payment row written; order stays pending",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-053"
+            },
+            {
+              "courseKey": "SCRUM-92",
+              "summary": "TC-SAPI-054 — bad card format / past expiry / short CVV -> 422 card_invalid with messages",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-054"
+            },
+            {
+              "courseKey": "SCRUM-93",
+              "summary": "TC-SAPI-055 — idempotency: paying an already-paid order -> 200, existing payment, no double stock decrement",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-055"
+            },
+            {
+              "courseKey": "SCRUM-94",
+              "summary": "TC-SAPI-056 — pay a non-existent order id -> 404",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-056"
+            },
+            {
+              "courseKey": "SCRUM-95",
+              "summary": "TC-SAPI-057 — ?delay= on pay respected and capped",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Low",
+              "tc": "TC-SAPI-057"
+            },
+            {
+              "courseKey": "SCRUM-162",
+              "summary": "TC-SAPI-070 — The pay endpoint requires no authentication or ownership",
+              "description": "Automated: tests/store/api/store-edge.spec.ts. PINS CURRENT BEHAVIOUR, which is arguably a defect: POST /api/checkout/:orderId/pay registers no requireAuth and performs no owner comparison, so any caller who knows an order id can pay a stranger's pending order. See test-design/test-design-coverage-audit.md section 4, finding 2. If the app is hardened, this test must be updated deliberately. Dev-only.",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-070"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-38",
+          "summary": "Automate store orders API + authz (owner-scoped access)",
+          "description": "TC-SAPI-060..063. Order retrieval + ownership/authz matrix. Answer-key ref: tests/store-checkout/* (orders).",
+          "labels": [
+            "api",
+            "qa-automation",
+            "security",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-96",
+              "summary": "TC-SAPI-060 — GET /api/orders (auth) -> 200; the user's orders; unauth -> 401",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SAPI-060"
+            },
+            {
+              "courseKey": "SCRUM-97",
+              "summary": "TC-SAPI-061 — GET /api/orders/:id -> 200; order + items + payment",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-061"
+            },
+            {
+              "courseKey": "SCRUM-98",
+              "summary": "TC-SAPI-062 — authz: another user fetching a user's order -> 403; owner/admin -> 200; guest order viewable by id",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "security",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-062"
+            },
+            {
+              "courseKey": "SCRUM-99",
+              "summary": "TC-SAPI-063 — GET /api/orders/:id missing -> 404",
+              "description": "",
+              "labels": [
+                "api",
+                "automated",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SAPI-063"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "courseKey": "SCRUM-27",
+      "summary": "Store DB verification: seed integrity, stock-on-paid, access fence",
+      "description": "Postgres-layer checks for the store: seed integrity (8 products/14 variants/3 coupons + facts), data-layer (stock-decrement-on-paid, order/payment integrity), and the qa_student access fence on store tables. Answer-key ref: scripts/seed-integrity.sh, scripts/verify-student-fence.sh, tests DB harness. Maps to TC-SDB-* in store-test-cases.md.",
+      "labels": [
+        "db",
+        "qa-automation",
+        "store"
+      ],
+      "priority": "Medium",
+      "tasks": [
+        {
+          "courseKey": "SCRUM-39",
+          "summary": "Automate store seed integrity (8 products / 14 variants / 3 coupons + facts)",
+          "description": "TC-SDB-001..003. Answer-key ref: scripts/seed-integrity.sh (store facts).",
+          "labels": [
+            "db",
+            "qa-automation",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-42",
+              "summary": "TC-SDB-001 — seed counts: products=8, variants=14, coupons=3",
+              "description": "Verifies the golden seed counts. Automated by scripts/seed-integrity.sh. Priority P1.",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SDB-001"
+            },
+            {
+              "courseKey": "SCRUM-43",
+              "summary": "TC-SDB-002 — seed facts: tee=2500, hoodie XL sold out, water bottle sold out, EXPIRED10 past-dated",
+              "description": "Verifies fixed golden-seed facts. Automated by scripts/seed-integrity.sh. Priority P1.",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SDB-002"
+            },
+            {
+              "courseKey": "SCRUM-44",
+              "summary": "TC-SDB-003 — referential integrity: no orphaned variants / order_items / payments",
+              "description": "Verifies FK integrity of the store tables. Automated by scripts/seed-integrity.sh. Priority P2.",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SDB-003"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-40",
+          "summary": "Automate store data-layer: stock-decrement-on-paid, order/payment integrity",
+          "description": "TC-SDB-010..014. Verify stock decrements only on approved payment; order/payment row integrity. Answer-key ref: tests DB harness.",
+          "labels": [
+            "db",
+            "qa-automation",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-100",
+              "summary": "TC-SDB-010 — stock decrement on paid: SELECT stock before, pay via API, SELECT after -> reduced by qty",
+              "description": "",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SDB-010"
+            },
+            {
+              "courseKey": "SCRUM-101",
+              "summary": "TC-SDB-011 — a paid order row: status=paid, total_cents = subtotal − discount, payments.status=approved",
+              "description": "",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SDB-011"
+            },
+            {
+              "courseKey": "SCRUM-102",
+              "summary": "TC-SDB-012 — order_items snapshot rows match the cart at checkout (name, qty, unit price)",
+              "description": "",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SDB-012"
+            },
+            {
+              "courseKey": "SCRUM-103",
+              "summary": "TC-SDB-013 — declined pay (4000…0002): order failed, payments.status=declined, stock unchanged",
+              "description": "",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SDB-013"
+            },
+            {
+              "courseKey": "SCRUM-104",
+              "summary": "TC-SDB-014 — set a variant stock=0 via SQL -> hidden from ?in_stock=true and blocks add-to-cart (restore after)",
+              "description": "",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SDB-014"
+            }
+          ]
+        },
+        {
+          "courseKey": "SCRUM-41",
+          "summary": "Automate the access fence on store tables (qa_student CRUD, no DDL)",
+          "description": "TC-SDB-020..022. Verify qa_student can CRUD store content but is denied DDL; each op rolled back. Answer-key ref: scripts/verify-student-fence.sh (store grants).",
+          "labels": [
+            "db",
+            "qa-automation",
+            "security",
+            "store"
+          ],
+          "priority": "Medium",
+          "subtasks": [
+            {
+              "courseKey": "SCRUM-105",
+              "summary": "TC-SDB-020 — qa_student full CRUD on all store tables (products…payments)",
+              "description": "",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "security",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SDB-020"
+            },
+            {
+              "courseKey": "SCRUM-106",
+              "summary": "TC-SDB-021 — DDL on store tables (DROP/ALTER/TRUNCATE) -> denied (extends verify-student-fence.sh)",
+              "description": "",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "security",
+                "store"
+              ],
+              "priority": "High",
+              "tc": "TC-SDB-021"
+            },
+            {
+              "courseKey": "SCRUM-107",
+              "summary": "TC-SDB-022 — post-db:reset + apply-student-role.sh -> store-table grants still hold",
+              "description": "",
+              "labels": [
+                "automated",
+                "db",
+                "env-dev",
+                "store"
+              ],
+              "priority": "Medium",
+              "tc": "TC-SDB-022"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

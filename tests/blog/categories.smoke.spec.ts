@@ -1,17 +1,21 @@
 import { test, expect } from '@playwright/test';
 import { runIfEnv } from '../../env/runIfEnv';
-import { loginViaUi } from '../support/auth';
+import { CategoriesPage } from '../../pages/CategoriesPage';
+import { LoginPage } from '../../pages/LoginPage';
 import { AUTHOR } from '../support/users';
 
 test.describe('Categories (dev smoke)', () => {
   runIfEnv(test, ['dev']);
 
   test('signed-in author sees the category list with at least one item', async ({ page }) => {
-    await loginViaUi(page, AUTHOR);
-    await page.goto('/categories');
+    const loginPage = new LoginPage(page);
+    await loginPage.open();
+    await loginPage.login(AUTHOR.email, AUTHOR.password);
 
-    const list = page.getByTestId('category-list');
-    await expect(list).toBeVisible();
-    await expect(list.getByTestId('category-item').first()).toBeVisible();
+    const categories = new CategoriesPage(page);
+    await categories.open();
+
+    await expect(categories.list).toBeVisible();
+    await expect(categories.items.first()).toBeVisible();
   });
 });

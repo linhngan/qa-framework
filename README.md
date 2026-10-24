@@ -34,3 +34,7 @@ and no step is repeated against a real site.
 `npx playwright test --list` should show 3 tests in one project, [chromium]:
 2 in tests/blog/home.smoke.spec.ts and 1 in tests/blog/categories.smoke.spec.ts.
 Listing doesn't run tests, so on prod it still shows all 3; they are only skipped when run.
+
+## Why "at least one" category (Task 04)
+- Why at least one: dev data is shared and changes, and the requirement is only a non-empty list.
+- When an exact count is right: when the test seeds its own data, or the number itself is the requirement.
