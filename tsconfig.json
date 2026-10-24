@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["env", "tests", "safety", "playwright.config.ts"]
+  "include": ["env", "tests", "pages", "safety", "playwright.config.ts"]
 }

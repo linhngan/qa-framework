@@ -10,7 +10,7 @@ Playwright + TypeScript tests for the course apps (dev and prod only). See [READ
 - Data-changing actions go through [envGuard](env/envGuard.ts) (throws on prod). No dry-run mode.
 - Never read or print .env files, auth state or credentials. No secrets in the repo.
 - Run prod (`npm run test:prod`) only when explicitly asked.
-- Not yet in scope: Page Objects, Jira, database, MCP, CI.
+- Not yet in scope: Jira, database, MCP, CI.
 
 ## Commands
 - `npm test` — browser tests on dev
@@ -20,4 +20,4 @@ Playwright + TypeScript tests for the course apps (dev and prod only). See [READ
 - `npm run test:safety` — resolver checks, no browser
 
 ## Key files
-[playwright.config.ts](playwright.config.ts) · [env/target.ts](env/target.ts) · [tests/support/env.ts](tests/support/env.ts) · [safety/](safety/) · [.claude/settings.json](.claude/settings.json)
+[playwright.config.ts](playwright.config.ts) · [env/target.ts](env/target.ts) · [tests/support/env.ts](tests/support/env.ts) · [pages/](pages/) · [safety/](safety/) · [.claude/settings.json](.claude/settings.json)
