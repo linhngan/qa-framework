@@ -1,23 +1,46 @@
 # qa-framework
-Playwright + TypeScript tests for the course apps (dev and prod only). See [README.md](README.md).
+Playwright + TypeScript tests for the Codemify course apps. Setup and background: [README.md](README.md).
 
-## Boundaries
-- Targets come only from [env/target.ts](env/target.ts) (resolveTarget/getTarget). Never hard-code URLs.
-- Only APP_ENV=dev|prod. Leave BASE_URL unset. Never add LOCAL_SANDBOX_DIR, local servers or other targets.
-- Switching environments means a new process. Don't mutate process.env at runtime.
-- Test helpers import [tests/support/env.ts](tests/support/env.ts), never playwright.config.ts.
-- Locators: getByTestId (data-testid). Env-limited tests use [runIfEnv](env/runIfEnv.ts).
-- Data-changing actions go through [envGuard](env/envGuard.ts) (throws on prod). No dry-run mode.
-- Never read or print .env files, auth state or credentials. No secrets in the repo.
+## Targets
+- dev: https://dev.ai-orchestration-courses.com (default)
+- prod: https://ai-orchestration-courses.com
+- Select only with APP_ENV=dev|prod, resolved by env/target.ts (resolveTarget/getTarget). Missing means dev.
+- Leave BASE_URL unset. Never hard-code URLs or add LOCAL_SANDBOX_DIR, local servers or other targets.
+- The target is fixed per process: start a new command to switch. Don't change process.env at runtime.
 - Run prod (`npm run test:prod`) only when explicitly asked.
-- Not yet in scope: Jira, database, MCP, CI.
+
+## Teaching login
+- Course demo account `AUTHOR` (author@codemify.test) lives in tests/support/users.ts.
+  It is course-designated teaching data, not a personal secret.
+- Import it; never copy its values into other files or print its password.
+- Add no personal or other credentials.
 
 ## Commands
 - `npm test` — browser tests on dev
-- `npm run test:prod` — browser tests on prod (explicit)
-- `npm run test:list` — list tests (dev)
+- `npm run test:prod` — browser tests on prod (explicit request only)
+- `npm run test:list` — list tests on dev
 - `npm run typecheck` — TypeScript check
-- `npm run test:safety` — resolver checks, no browser
+- `npm run test:safety` — isolated target/helper checks; no browser, no network
 
-## Key files
-[playwright.config.ts](playwright.config.ts) · [env/target.ts](env/target.ts) · [tests/support/env.ts](tests/support/env.ts) · [pages/](pages/) · [safety/](safety/) · [.claude/settings.json](.claude/settings.json)
+## Always
+1. No data changes on prod.
+2. Human approval before any action that changes an outside system (dev data, Jira, GitHub).
+3. No secrets in tracked files or in output.
+
+Details: .claude/rules/01-guardrails.md.
+
+## Rule files
+| File | Applies to |
+|---|---|
+| .claude/rules/01-guardrails.md | whole project, always loaded |
+| .claude/rules/10-playwright-pom.md | tests/**/*.ts, pages/**/*.ts |
+| .claude/rules/20-data-management.md | tests/**/*.ts, pages/**/*.ts, scripts/**, jira-seed/** |
+| .claude/rules/30-test-names.md | tests/**/*.spec.ts |
+
+## Layout
+- tests/blog/ browser tests · tests/support/ env wrapper, shared users
+- pages/ Page Objects · env/ target, runIfEnv, envGuard
+- safety/ isolated checks (node --test) · evidence/ task notes and raw drafts (not typechecked or run)
+
+## Not yet in scope
+Database, CI.
