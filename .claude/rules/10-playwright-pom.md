@@ -45,9 +45,9 @@ Applies when working on browser tests (`tests/`) and Page Objects (`pages/`). �
 - ⚠️ An exact count passes today and fails when someone else adds data on dev.
 
 ## P9. Only verified test IDs
-- Do: use a test ID only after it has been seen on live dev (Playwright MCP browser or a passing test) and recorded in evidence; today that is the ownership table in evidence/task02-note.md. Mark anything else as unverified; never present a guessed ID as verified.
-- Check: compare `grep -rn getByTestId pages` with the evidence table.
-- ⚠️ A guessed ID in a Page Object method that no test calls still passes typecheck (`BlogListPage.openFirstArticle()` is in that state until Task 04).
+- Do: use a test ID only after it has been seen on live dev (Playwright MCP browser or a passing test) and recorded in evidence; today that is the ownership tables in evidence/task02-note.md and evidence/task04-note.md. Mark anything else as unverified; never present a guessed ID as verified.
+- Check: compare `grep -rn getByTestId pages` with the evidence tables.
+- ⚠️ A guessed ID in a Page Object member that no test uses still passes typecheck. Confirm every new member is used by at least one passing test.
 
 ## P10. Relative navigation only
 - Do: navigate with relative paths (`goto('/login')`) so the address comes from `baseURL`. Test helpers import tests/support/env.ts, never playwright.config.ts.
