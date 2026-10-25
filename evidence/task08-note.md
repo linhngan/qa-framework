@@ -1,6 +1,6 @@
 # Task 08: lint, format and Git hooks
 
-Date: 2026-10-25 · Branch: `week-2` (from `cc02215`) · Node v24.21.0 · Git 2.54.0 · Not committed yet.
+Date: 2026-10-25 · Branch: `week-2` (from `cc02215`) · Node v24.21.0 · Git 2.54.0 · Setup commit `6648118`.
 
 ## Compatibility, checked before installation
 `npm view <pkg>@<version> engines peerDependencies` for each package in the course set:
@@ -89,8 +89,28 @@ Set up in the session scratchpad: a copy of the tracked and new files (no `.env`
 
 Afterwards the bare remote held only `refs/heads/week-2`. In the copy, the `node_modules` symlink was committed, because `.gitignore`'s `node_modules/` matches directories only. This happens only in the copy; the real project has a real `node_modules/` folder.
 
+## Clean clone of the Task 08 commit
+Commit `6648118` ("Task 08: add lint, format and Git hooks") was made in this repository with the hooks active (pre-commit scan and lint-staged passed).
+
+Setup: `git clone --no-local --branch week-2` of this repository into the session scratchpad. Then `git remote remove origin`, so the clone had no remote at all. No `.env`, `node_modules` or `.auth` was present. No Jira import was run, and no browser was started.
+
+| Check | Result |
+|---|---|
+| `core.hooksPath` before `npm ci` | unset |
+| `npm ci` | exit 0; `prepare` ran `husky`; added 129 packages, audited 130; found 0 vulnerabilities; the same fsevents allowScripts notice as above |
+| `npm ls --depth=0` | exit 0, same 12 exact versions as installed above (TypeScript 6.0.3, Playwright 1.61.1) |
+| `core.hooksPath` after `npm ci` | `.husky/_`, with `pre-commit`, `pre-push` and `h` generated; `.husky/_` is ignored by Git |
+| `git status` after `npm ci` | clean (the lock file was not rewritten) |
+| `npm run format:check` / `lint` / `typecheck` | exit 0 / exit 0 / exit 0 |
+| `npm run test:safety` | 158 pass, 0 fail |
+| `npm run test:list` | `Total: 5 tests in 4 files` (listing only) |
+| `git hook run pre-commit` (empty index) | exit 0, "lint-staged could not find any staged files" |
+
+## Not done in Task 08
+- The editor-made mistake examples (focused test, skipped test, made-up token, staged token with an unstaged clean copy) in a disposable repo, and the push tests against a local remote's main, were set up but not run. The earlier automated run above covers the same refusals.
+- The `no-console` boundary exercise was proposed but not made, so `eslint.config.mjs` has no `no-console` rule.
+
 ## Not verified / limits
-- No real commit or push in this repository has gone through the hooks yet (nothing is committed for Task 08).
 - `HUSKY=0` and `--no-verify` skip all of this silently. G7 forbids them, but only review enforces G7. There is no CI.
 - The token check knows four prefixes. A secret in any other format passes.
 - ESLint does not typecheck `.mjs` files.
