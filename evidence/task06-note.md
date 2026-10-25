@@ -115,6 +115,7 @@ The exact connection string `node scripts/hooks/guard.mjs` was run through `sh -
 | project root | 2, `guard: BLOCKED — .env is a protected secret file (.env). …` | 2, `guard: BLOCKED — this edit to tests/blog/home.smoke.spec.ts removes expect( calls (old 2, new 1). …` | 0, silent |
 | `tests/blog/` | 1, `MODULE_NOT_FOUND` | 1 | 1 |
 
+- **Superseded:** the command was later corrected to `node "${CLAUDE_PROJECT_DIR}"/scripts/hooks/guard.mjs`, which gives 2 / 2 / 0 from both folders (see "Command correction").
 - **From a subfolder** the relative path cannot be found. Exit 1 is a non-blocking error for PreToolUse, so the edit would go ahead unguarded. This is the same working-folder weakness Task 05 fixed for the recorder. The relative command was kept because Task 06 specifies it.
 - **The project's real `.env`.** A `.env` exists at the project root (dated 2026-10-15, created before this task). It is ignored by Git. Only its directory entry was listed; neither the guard nor this check opened it.
 
@@ -134,7 +135,7 @@ The exact connection string `node scripts/hooks/guard.mjs` was run through `sh -
 The guard lets an edit through, without blocking, when:
 - the input is malformed, unreadable, or missing a required string field;
 - an unexpected error occurs;
-- the script or `node` cannot be found: for example, Claude Code's current folder is not the project root (exit 1, shown above);
+- the script or `node` cannot be found (exit 1). With the original relative command this happened whenever Claude Code's current folder was not the project root (shown above). The corrected command removes that case, but a missing `node` or a missing script would still fail open;
 - the hook is not loaded or not approved in the session;
 - the tool is not Edit or Write: Bash redirection or `sed`, NotebookEdit, and anything else outside the matcher;
 - the edit is made outside Claude Code: in an editor or IDE, by hand, or by another program. Hooks run only for Claude Code's own tool calls, so such edits never reach the guard;
@@ -167,8 +168,8 @@ The guard and its test file have no exemption from secret scanning.
 | Item | Status |
 |---|---|
 | Script verified | Yes: 34 isolated guard checks pass, covering checks 1–7 (26 for checks 1–6, then 8 for check 7), plus the command-string check from the project root (2 / 2 / 0) |
-| Configured | Yes: `PreToolUse`, matcher `Edit\|Write`, command `node scripts/hooks/guard.mjs`. It was added after the checks above passed |
-| Live hook | Verified for one refusal, the `.only` check, from the project root (see "Live refusal"). Not tried from a subfolder; checks 1, 2 and 4–6 have not been tried live |
+| Configured | Yes: `PreToolUse`, matcher `Edit\|Write`. The command is now `node "${CLAUDE_PROJECT_DIR}"/scripts/hooks/guard.mjs` (see "Command correction"); it was first added as `node scripts/hooks/guard.mjs` after the checks above passed |
+| Live hook | Verified for two refusals of the `.only` check from the project root: the first with the relative command ("Live refusal"), the second with the corrected command ("Command correction"). Not tried in a session started from a subfolder; checks 1, 2 and 4–7 have not been tried live |
 
 ## Connection
 
@@ -219,7 +220,7 @@ PreToolUse:Edit hook error: [node scripts/hooks/guard.mjs]: guard: BLOCKED — t
 **Verified:** the PreToolUse guard, connected with `node scripts/hooks/guard.mjs`, ran live inside Claude Code from the project root and refused an Edit with exit 2. Its reason reached Claude as the tool error.
 
 **Still unverified**
-- The guard's live behaviour from a session started in a subfolder, where the relative command is expected to fail open.
+- The guard's live behaviour from a session started in a subfolder. The relative command was expected to fail open there; it has since been corrected (see "Command correction").
 - The other checks live: filename, secret, `.skip`, `expect(` and the helpers.
 - An allowed call that is shown to have passed through the guard.
 - `/hooks`, and a fresh session.
@@ -305,3 +306,46 @@ This matches the established baseline of 5 passed. Nothing was skipped or retrie
   - every detector string and sample in `guard.mjs` and `guard.test.mjs` is joined from pieces (`[...].join('')`);
   - a search of all tracked and new files, excluding `.playwright-mcp/`, found no literal detector string;
   - no scanner allowlist, exemption or config file was added.
+
+## Command correction (2026-10-25, after commit `c2ca38c`)
+
+**Problem.** The relative command `node scripts/hooks/guard.mjs` fails with `MODULE_NOT_FOUND` (exit 1) when Claude Code's current folder is not the project root (see "Command resolution"). PreToolUse treats exit 1 as non-blocking, so the guard failed open there.
+
+**Change.** Only the PreToolUse `command` string in `.claude/settings.json` changed. It now uses the same quoted shell form as the Task 05 recorder:
+```diff
+-          { "type": "command", "command": "node scripts/hooks/guard.mjs" }
++          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/hooks/guard.mjs" }
+```
+- **Unchanged, compared with HEAD:** `permissions`, the PostToolUse and SessionStart recorder hooks, and the matcher (`Edit|Write`).
+- **Not touched:** `guard.mjs`, its tests, the demonstration spec, and every other file.
+- The settings Edit was itself allowed and logged one recorder entry.
+
+**Command-string check, repeated.** The new string was run through `sh -c` with the three quick-sample inputs and `CLAUDE_PROJECT_DIR` set to the project root. These were command-string runs, not live hooks.
+
+| Run from | Protected Write `.env` | Edit removing an `expect(` | Comment-only Edit |
+|---|---|---|---|
+| project root | 2, `.env is a protected secret file (.env)` | 2, `removes expect( calls (old 2, new 1)` | 0, silent |
+| `tests/blog/` | 2, the same reason | 2, the same reason | 0, silent |
+
+Before the correction, `tests/blog/` gave exit 1 for all three.
+
+**Isolated checks, repeated.** `npm run test:safety`: tests 90, suites 13, pass 90, fail 0, cancelled 0, skipped 0.
+
+**Live refusal, repeated with the corrected command (09:00Z, same session, from the project root)**
+- **Before:**
+  - `tests/blog/home.smoke.spec.ts` was clean against HEAD (SHA-1 `b54e1e0…`) and copied aside;
+  - `2026-10-24.md`, `2026-10-25.md` (41 lines) and `sessions.log` were copied aside.
+- **The attempt.** One **Claude Edit** proposed the same harmless line after the import, `// Task 06 guard check: test.only(`. The replaced import line has no `.only`.
+- **The actual tool result:**
+  ```
+  PreToolUse:Edit hook error: [node "${CLAUDE_PROJECT_DIR}"/scripts/hooks/guard.mjs]: guard: BLOCKED — tests/blog/home.smoke.spec.ts would gain .only, which runs only that test and silently skips the rest. Remove .only.
+  ```
+- **After:** the spec is byte-identical to the copy, and `git status` shows no change under `tests/`. All three log files are byte-identical to the copies, so the refused call added no entry.
+
+**What this verifies**
+- Claude Code reloaded the settings in this session without a restart: the bracketed command in the tool error is the new string.
+- The corrected command refuses live from the project root.
+
+**Still unverified**
+- The live hook in a session started from a subfolder. Only the command string has been run from `tests/blog/`, and that is not a live hook.
+- Whether `CLAUDE_PROJECT_DIR` is set as documented in such a session.
