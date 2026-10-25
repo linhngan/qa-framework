@@ -4,6 +4,7 @@
  *
  *   node scripts/vault-sync.mjs --from-hook       read hook JSON on stdin, log one edited file
  *   node scripts/vault-sync.mjs --session-start   log a session start to sessions.log
+ *   node scripts/vault-sync.mjs --session-end     log a session end, short HEAD and uncommitted file count
  *
  * Both are logging modes: they always exit 0, so a logging problem never blocks
  * the session. A write failure prints one short line on stderr, never the input.
@@ -25,6 +26,20 @@ function git(args) {
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
     return out || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
+/** Number of non-empty output lines, or 'unknown' when Git fails (0 means a clean result). */
+function gitCount(args) {
+  try {
+    const out = execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return String(out.split('\n').filter((line) => line !== '').length);
   } catch {
     return 'unknown';
   }
@@ -96,7 +111,16 @@ if (mode === '--from-hook') {
 } else if (mode === '--session-start') {
   append(path.join(changelogDir, 'sessions.log'), `- session START ${utcTime(now)}`);
   process.exit(0);
+} else if (mode === '--session-end') {
+  // Counted before the append, and sessions.log is ignored by Git, so the line never counts itself.
+  const commit = git(['rev-parse', '--short', 'HEAD']);
+  const uncommitted = gitCount(['status', '--porcelain', '--untracked-files=all']);
+  append(
+    path.join(changelogDir, 'sessions.log'),
+    `- session END ${utcTime(now)} · commit: ${commit} · uncommitted: ${uncommitted}`,
+  );
+  process.exit(0);
 } else {
-  process.stderr.write('usage: vault-sync.mjs --from-hook | --session-start\n');
+  process.stderr.write('usage: vault-sync.mjs --from-hook | --session-start | --session-end\n');
   process.exit(2);
 }

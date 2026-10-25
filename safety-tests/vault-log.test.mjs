@@ -216,3 +216,100 @@ describe('vault-sync --session-start', () => {
     assert.deepEqual(changelogFiles(), []);
   });
 });
+
+describe('vault-sync --session-end', () => {
+  const END = new RegExp(`^- session END ${ENTRY_TIME} · commit: (\\S+) · uncommitted: (\\S+)$`);
+  const sessionsLog = () => path.join(changelogDir(), 'sessions.log');
+  const sessionLines = () => readFileSync(sessionsLog(), 'utf8').split('\n').filter(Boolean);
+
+  function put(rel, content = 'x\n') {
+    mkdirSync(path.dirname(path.join(project, rel)), { recursive: true });
+    writeFileSync(path.join(project, rel), content);
+  }
+
+  /** Commits a .gitignore with *.log, as in the real project, so sessions.log stays ignored. */
+  function ignoreLogs() {
+    put('.gitignore', '*.log\n');
+    gitIn(project, 'add', '.gitignore');
+    gitIn(project, 'commit', '-q', '-m', 'ignore logs');
+  }
+
+  function lastEnd() {
+    const line = sessionLines().at(-1);
+    const match = line.match(END);
+    assert.ok(match, `END line shape: ${line}`);
+    return { commit: match[1], uncommitted: match[2] };
+  }
+
+  it('logs END with a UTC time, the short HEAD ID and the uncommitted count, nested untracked files included', () => {
+    makeRepo(project);
+    ignoreLogs();
+    put('tracked.ts');
+    gitIn(project, 'add', 'tracked.ts');
+    gitIn(project, 'commit', '-q', '-m', 'add tracked');
+    put('tracked.ts', 'changed\n');
+    put('new/a/b.ts');
+    put('new/c.md');
+    const result = run(['--session-end']);
+    assert.equal(result.status, 0);
+    assert.equal(result.stderr, '');
+    assert.equal(sessionLines().length, 1);
+    assert.deepEqual(lastEnd(), { commit: shortHead(), uncommitted: '3' });
+  });
+
+  it('reports 0, not unknown, for a clean tree', () => {
+    makeRepo(project);
+    ignoreLogs();
+    assert.equal(run(['--session-end']).status, 0);
+    assert.deepEqual(lastEnd(), { commit: shortHead(), uncommitted: '0' });
+  });
+
+  it('uses "unknown" for the commit in a repository with no commits, still counting files', () => {
+    gitIn(project, 'init', '-q', '-b', 'empty-branch');
+    put('one.md');
+    put('dir/two.ts');
+    assert.equal(run(['--session-end']).status, 0);
+    assert.deepEqual(lastEnd(), { commit: 'unknown', uncommitted: '2' });
+  });
+
+  it('uses "unknown" for both outside a Git repository and exits 0', () => {
+    const result = run(['--session-end']);
+    assert.equal(result.status, 0);
+    assert.equal(result.stderr, '');
+    assert.deepEqual(lastEnd(), { commit: 'unknown', uncommitted: 'unknown' });
+  });
+
+  it('appends after existing START and END lines without changing them, never counting the ignored sessions.log', () => {
+    makeRepo(project);
+    ignoreLogs();
+    assert.equal(run(['--session-start']).status, 0);
+    assert.equal(run(['--session-end']).status, 0);
+    const before = readFileSync(sessionsLog(), 'utf8');
+    assert.equal(run(['--session-end']).status, 0);
+    const after = readFileSync(sessionsLog(), 'utf8');
+    assert.ok(after.startsWith(before), 'existing lines must stay unchanged');
+    const lines = sessionLines();
+    assert.equal(lines.length, 3);
+    assert.match(lines[0], new RegExp(`^- session START ${ENTRY_TIME}$`));
+    for (const line of lines.slice(1)) assert.equal(line.match(END)?.[2], '0', `count excludes sessions.log: ${line}`);
+    assert.deepEqual(changelogFiles(), []);
+  });
+
+  it('accepts SessionEnd JSON on stdin without needing it', () => {
+    makeRepo(project);
+    ignoreLogs();
+    const result = run(['--session-end'], JSON.stringify({ hook_event_name: 'SessionEnd', reason: 'other' }));
+    assert.equal(result.status, 0);
+    assert.equal(result.stderr, '');
+    assert.equal(sessionLines().length, 1);
+  });
+
+  it('exits 0 and reports a write failure briefly', () => {
+    makeRepo(project);
+    mkdirSync(path.join(project, 'vault'));
+    writeFileSync(changelogDir(), 'not a folder');
+    const result = run(['--session-end']);
+    assert.equal(result.status, 0);
+    assert.match(result.stderr, /^vault-sync: could not write changelog \(\w+\)\n$/);
+  });
+});

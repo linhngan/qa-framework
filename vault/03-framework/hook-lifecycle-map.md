@@ -26,6 +26,9 @@ The three are tracked separately: a configured hook whose script passes its chec
 - 2026-10-25, Task 06: the first live refusal. One Claude Edit proposing `// Task 06 guard check: test.only(` in the demonstration spec was refused by the PreToolUse guard. The spec stayed byte-identical, and the recorder added no entry, so a refused call does not reach PostToolUse.
 - 2026-10-25, Task 06: added check 7, which blocks `waitForTimeout(` newly added to a `*.spec.ts` by Edit or Write. `npm run test:safety`: 90 passed (82 earlier + 8 hard-wait checks). Check 7 is script-verified only; it has not run live.
 - 2026-10-25, after commit `c2ca38c`: the guard command now starts the script through `"${CLAUDE_PROJECT_DIR}"`. The repeated live `.only` refusal (09:00Z) showed the new command in the tool error, so the settings were reloaded without a restart.
+- 2026-10-25, Task 07: added scripts/hooks/session-preflight.mjs, scripts/hooks/stop-worklog.mjs, the `/worklog` command (.claude/commands/worklog.md) and safety-tests/worklog.test.mjs. `npm run test:safety`: 111 passed (90 earlier + 21 new). The preflight was then connected as a second SessionStart command, and stop-worklog as a Stop hook. Neither has run live yet.
+- 2026-10-25, Task 07: the Stop reminder was seen live at several turn ends, and each retry ended the turn.
+- 2026-10-25, Task 07: added `--session-end` to scripts/vault-sync.mjs. `npm run test:safety`: 118 passed (111 earlier + 7 new). It was then connected as a SessionEnd hook with `timeout: 5`. No END line yet.
 
 ## Hook settings
 
@@ -34,6 +37,9 @@ The three are tracked separately: a configured hook whose script passes its chec
 | PreToolUse | `Edit\|Write` | `node "${CLAUDE_PROJECT_DIR}"/scripts/hooks/guard.mjs` | Yes (Task 06; the command was corrected from `node scripts/hooks/guard.mjs` after commit `c2ca38c`) | Yes: 34 guard checks pass, covering all seven checks. The corrected command string gave 2 / 2 / 0 for the quick sample from both the project root and `tests/blog/` | **Verified for check 3 (`.only`), from the project root.** A Claude Edit adding a comment with `.only` to `tests/blog/home.smoke.spec.ts` was refused twice: at 08:32Z with the relative command and at 09:00Z with the corrected one. The tool error named the corrected command, and both times the file was unchanged and no log entry was added. Not seen in a session started from a subfolder. Checks 1, 2 and 4–7 have not been tried live |
 | PostToolUse | `Edit\|Write` | `node "${CLAUDE_PROJECT_DIR}"/scripts/vault-sync.mjs --from-hook` | Yes (Task 05) | Yes: 12 vault-sync `--from-hook` checks (the 13th covers `--session-start`) | Verified from the project root. Each Claude Edit of `tests/blog/home.smoke.spec.ts` added exactly one line (first 2026-10-24T16:00:59Z; latest 2026-10-25T08:03:06Z), and vault paths add none. Not yet seen from a session started in a subfolder |
 | SessionStart | omitted, so it fires for `startup`, `resume`, `clear`, `compact` and `fork` | `node "${CLAUDE_PROJECT_DIR}"/scripts/vault-sync.mjs --session-start` | Yes (Task 05) | Yes: 1 vault-sync check | Fired once, with the earlier relative-path command: `- session START 2026-10-24T16:00:28Z`. The line does not record which source fired it. The current command has not run yet |
+| SessionStart (same group, runs in parallel with the recorder) | omitted | `node "${CLAUDE_PROJECT_DIR}"/scripts/hooks/session-preflight.mjs` | Yes (Task 07) | Yes: 4 preflight checks. A direct run on the project printed the five lines | **Not verified.** No session has started since it was connected |
+| Stop | none (Stop has no matcher) | `node "${CLAUDE_PROJECT_DIR}"/scripts/hooks/stop-worklog.mjs` | Yes (Task 07) | Yes: 17 stop-worklog checks. A direct run on the project gave 2 with the reminder; retry and malformed input gave 0 | **Verified for the reminder and the retry** (2026-10-25, from the project root). It held two turn ends open with the exact journal path and `/worklog`, and each retry ended the turn. "Entry exists → 0" has not been seen live: no journal exists yet |
+| SessionEnd | omitted, so it fires for every reason: `clear`, `resume`, `logout`, `prompt_input_exit` and `other` | `node "${CLAUDE_PROJECT_DIR}"/scripts/vault-sync.mjs --session-end`, `timeout: 5` | Yes (Task 07) | Yes: 7 `--session-end` checks. 0.07 s per run against a scratch clone, against a 1.5 s default budget | **Pending.** No session has ended since it was connected: `sessions.log` has no END line |
 
 ## PreToolUse guard
 
@@ -81,10 +87,53 @@ When a hook fires, Claude Code runs the command and pipes a short JSON descripti
 
 Not enabled for this exercise. No watcher existed before Task 05, so nothing was removed. The script already accepts a top-level `file_path` (the FileChanged input shape), so a watcher could be added later without changing it; loop protection 2 would stop it logging the script's own writes.
 
-## Future proposal (documentation only, not configured)
+## Startup summary and daily-note reminder (Task 07)
 
+**SessionStart preflight.** It prints five lines that Claude Code adds to Claude's context:
+- the local date;
+- the branch, or `no-branch`;
+- the uncommitted file count, from `git status --porcelain --untracked-files=all`, or `unknown`;
+- the newest `YYYY-MM-DD.md` under `vault/12-progress-report/`, or `none yet`;
+- `Map: vault/_map.md`.
+
+It always exits 0. It runs in parallel with the recorder and does not depend on it.
+
+**Stop reminder.** When Claude finishes a turn, `stop-worklog.mjs` reads the Stop JSON.
+- **When it reminds:** there is work today and `vault/12-progress-report/<slug>/<local date>.md` has no `## HH:MM` entry. It then exits 2 with `worklog: BLOCKED — …`, naming that path and `/worklog`. Per the official reference, exit 2 keeps the turn going and shows the reason to Claude.
+- **What counts as work today:** a `.ts`, `.mjs`, `.json`, `.md` or `.sh` file uncommitted, or a commit with today's local date.
+- **The retry:** `stop_hook_active: true` exits 0, so the reminder appears at most once per turn end. The reference also caps stop-hook continuations at 8 in a row.
+- **Everything else exits 0:** malformed input, no work, an existing entry, and unexpected errors.
+
+**`/worklog`** (.claude/commands/worklog.md) gets the path from `stop-worklog.mjs --path`, takes the time from `date +%H:%M`, and appends a `## HH:MM` entry with Did, Worked / didn't and Next bullets. It never includes secrets.
+
+**How they fit with the earlier hooks**
+- **Recorder:** journal writes are inside `vault/`, so they add no changelog line.
+- **Guard:** it allows `.md` files apart from its filename and secret checks.
+- **Activity:** because the recorder's changelog is a qualifying `.md` change, almost any Claude edit counts as work today.
+
+## Session end (Task 07)
+
+The earlier "future proposal" for SessionEnd is now configured, as a `sessions.log` line rather than a journal line. When a session ends, `vault-sync.mjs --session-end` appends:
 ```
-Event: SessionEnd.
-Matcher: omitted, so it would apply to all session endings.
-Behavior: append a closing journal line so a reviewer can see when the session ended.
+- session END <UTC>Z · commit: <short HEAD> · uncommitted: <count>
 ```
+- **The count** uses `git status --porcelain --untracked-files=all`, so files inside new folders count one by one. It is `unknown` only if Git fails.
+- **The commit** is `unknown` when there is no commit.
+- **The log stays out of Git:** `sessions.log` is ignored (`.gitignore:22:*.log`) and is never counted.
+- **Ending a session in the CLI:** use `/clear` (it ends this session and starts a new one, so START and preflight run too) or `/exit`.
+- **Ending a session in the VS Code panel:** the docs do not say whether closing a tab ends the session. The proof is an END line appearing in `sessions.log`.
+
+## Hook roles and blocking
+
+From the official hooks reference ("exit code 2 behavior per event"):
+
+| Event | When it runs | Our hooks | Can it block? |
+|---|---|---|---|
+| SessionStart | A session starts, resumes, is cleared, compacted or forked | Recorder `--session-start`; `session-preflight.mjs`, whose stdout goes to Claude's context | **No.** Exit 2 only shows stderr to the user |
+| PreToolUse | Before each matching tool call (`Edit\|Write`) | `guard.mjs` | **Yes.** Exit 2 blocks the tool call, and stderr is shown to Claude |
+| PostToolUse | After a matching tool call succeeds | Recorder `--from-hook` | **No.** The tool has already run; exit 2 only shows stderr to Claude |
+| Stop | Claude finishes responding | `stop-worklog.mjs` | **Yes.** Exit 2 stops Claude from finishing and continues the turn. `stop_hook_active` and the 8-continuation cap prevent loops |
+| SessionEnd | The session ends | Recorder `--session-end` | **No.** It cannot block ending; exit 2 only shows stderr to the user |
+| FileChanged | A watched file changes | none: not enabled (see "FileChanged watcher") | **No** |
+
+Every hook here fails open, so a script that cannot run never stops the session. Only PreToolUse and Stop can hold work back, and only by exiting 2 on purpose.

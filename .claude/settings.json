@@ -37,7 +37,22 @@
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/vault-sync.mjs --session-start" }
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/vault-sync.mjs --session-start" },
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/hooks/session-preflight.mjs" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/hooks/stop-worklog.mjs" }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/vault-sync.mjs --session-end", "timeout": 5 }
         ]
       }
     ]
