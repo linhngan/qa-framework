@@ -16,5 +16,22 @@
       "Bash(npm run typecheck)",
       "Bash(npm run test:safety)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/vault-sync.mjs --from-hook" }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/vault-sync.mjs --session-start" }
+        ]
+      }
+    ]
   }
 }
