@@ -259,7 +259,22 @@ Permissions, PreToolUse and PostToolUse are identical to HEAD.
 
 | Hook | Configured | Script verified | Live hook |
 |---|---|---|---|
-| SessionStart `session-preflight.mjs` | Yes | Yes: 4 checks, plus direct runs on the real project | Not verified: no SessionStart has run since it was connected, and no summary reached Claude |
-| Stop `stop-worklog.mjs` | Yes | Yes: 17 checks, plus direct runs | **Verified for the reminder and the retry.** It refused at two turn ends with the exact path and `/worklog`, and each retry ended the turn. The "entry exists → 0" case has not been seen live, because no journal exists yet |
-| `/worklog` command | Yes (file exists) | Not applicable: instructions for Claude, not a script | Not verified: not run yet |
-| SessionEnd `vault-sync.mjs --session-end` | Yes (`timeout: 5`) | Yes: 7 checks; 0.07 s per run | **Pending:** no END line in `sessions.log` yet |
+| SessionStart `session-preflight.mjs` | Yes | Yes: 4 checks, plus direct runs on the real project | **Verified (2026-10-25, after `/clear`)**; see "Live results after the commit" below. Originally: not verified |
+| Stop `stop-worklog.mjs` | Yes | Yes: 17 checks, plus direct runs | **Verified for the reminder, the retry and "entry exists → 0"**; see below |
+| `/worklog` command | Yes (file exists) | Not applicable: instructions for Claude, not a script | **Verified (2026-10-26)**; see below |
+| SessionEnd `vault-sync.mjs --session-end` | Yes (`timeout: 5`) | Yes: 7 checks; 0.07 s per run | **Verified (2026-10-25, on `/clear`)**; see below. Originally: pending |
+
+## Live results after the commit (recorded 2026-10-26 from existing records)
+None of these was rerun to write this section. The sources are `vault/_changelog/sessions.log` (ignored by Git, so local only), the journals, and the saved session transcript.
+
+- **SessionEnd:** `/clear` ended the session that made `cc02215`. `sessions.log` line 2: `- session END 2026-10-25T11:15:44Z · commit: cc02215 · uncommitted: 13`. Its 13 matches `git status` at that moment: 12 untracked `.playwright-mcp/` files plus the untracked journal. This is the first and so far only END line.
+- **SessionStart, both commands:**
+  - the recorder wrote `- session START 2026-10-25T11:15:44Z` (`sessions.log` line 3);
+  - the preflight summary reached Claude at the start of the new session as `SessionStart:clear hook success: Date: 2026-10-25 / Branch: week-2 / Uncommitted files: 13 / Latest journal: vault/12-progress-report/ngan-nguyen/2026-10-25.md / Map: vault/_map.md` (transcript).
+
+  That covers the preflight's five lines.
+- **Stop reminder on a new day:** on 2026-10-26 a turn end was held with `worklog: BLOCKED — today's work has no journal entry yet. Run /worklog to append a "## HH:MM" entry to vault/12-progress-report/ngan-nguyen/2026-10-26.md …` (transcript).
+- **`/worklog`:** it then created `vault/12-progress-report/ngan-nguyen/2026-10-26.md` with `## 00:02` (Did / Worked / didn't / Next), using the `--path` output and `date +%H:%M`.
+- **"Entry exists → 0":** after that entry, the following turn ends were not held for the rest of that day (transcript: no further `worklog: BLOCKED` on 2026-10-26).
+
+Still not observed live: a SessionEnd for a reason other than `clear`, and the preflight in a session started from a subfolder.

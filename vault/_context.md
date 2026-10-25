@@ -32,10 +32,9 @@ Where the project stands, what is proven, and what is not. Updated by hand; each
 
   All three are script-verified (evidence/task11-note.md).
 - The generator supports only the syntax the current specs use: one level of `test.describe`, literal titles, `test.beforeEach` and `runIfEnv`. Anything else fails the run by design.
-- Journals in `12-progress-report/` and today's changelog are not tracked in Git, so the map describes them without linking them.
+- Journals in `12-progress-report/` are kept in Git, together with the daily change logs. `sessions.log` and `.playwright-mcp/` (local browser snapshots) are ignored, so the Task 01 snapshots and the session START/END lines exist only on this machine.
 - There is no CI. Git hooks run only where `npm install` activated them.
 
 ## Next work
 - **Task 11:** push after review. The first commit containing a staged spec will be the first live run of the pre-commit note refresh here.
-- **Open decisions:** track the journals; commit the changelog lines; the G5 line for `Edit(.env*)`; a `settings.test.mjs` proof.
-- **Open user steps:** delete the `.env.permission-check` fixture; report the `/permissions` view.
+- **Open user steps:** delete the `.env.permission-check` fixture (Claude's own attempt was refused by the permission system); report the `/permissions` view; run the Task 08 editor examples and the `no-console` practice if wanted.

@@ -269,3 +269,16 @@ SessionStart | (none)     | node "${CLAUDE_PROJECT_DIR}"/scripts/vault-sync.mjs 
 **Check 4, isolated checks: verified.** `npm run test:safety`: tests 56, pass 56, fail 0, cancelled 0, skipped 0.
 
 **Check 3, a session started from a subfolder: not run.** It needs a new session started by a person; see "Not verified yet".
+
+## How the recorder receives the edit (stdin)
+Added 2026-10-26 to close an audit gap. Line numbers refer to `scripts/vault-sync.mjs` as of Task 11.
+- **What Claude Code sends:** for each hook event it starts the configured command (`node "${CLAUDE_PROJECT_DIR}"/scripts/vault-sync.mjs --from-hook`) and writes one JSON object describing the event to that process's **standard input (stdin)**. For PostToolUse on Edit or Write, the object holds `hook_event_name`, `tool_name` and `tool_input`, and `tool_input.file_path` is the edited file. Nothing is passed as a command-line argument.
+- **How the script reads it:**
+  - `readStdin()` (:80) reads all of stdin with `readFileSync(0, 'utf8')` (:82); file descriptor 0 is stdin.
+  - `projectPath()` (:89) removes any leading byte-order marks and parses the JSON (:92).
+  - It takes `tool_input.file_path`, or `file_path` (:96).
+  - It makes the path project-relative and drops anything outside the project or inside `vault/` (:101).
+  - `main` calls `projectPath(readStdin())` for `--from-hook` (:733).
+- **When stdin is empty, missing or not JSON:** `readStdin()` returns `''`, `projectPath()` returns `null`, and nothing is logged. The mode still exits 0, so a bad event never blocks Claude.
+- **Why stdin:** that is how Claude Code delivers hook input (hooks reference, as used in Task 06), and it keeps file paths out of the shell command line.
+- **Tests:** the isolated checks feed made-up events the same way, through `spawnSync(…, { input })` in `safety-tests/vault-log.test.mjs`. That includes malformed JSON and a leading byte-order mark.

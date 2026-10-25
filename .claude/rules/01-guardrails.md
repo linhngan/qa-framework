@@ -35,8 +35,8 @@ Applies to the whole project, always. ⚠️ marks a mistake that our current ch
 ## G5. No secrets in tracked files or output
 - Do: never read, print or commit .env files, login state (`.auth/`, `*storageState*.json`), tokens or keys. The course demo account in tests/support/users.ts is the only login kept in the repo.
 - When: always, including chat output, logs and evidence notes.
-- Check: .gitignore ignores `.env` and `.env.*` (it un-ignores `.env.example`, which does not exist yet), `.auth/`, `*storageState*.json` and key files. .claude/settings.json denies Claude's Read tool access to `.env`, `.env.*` and login state.
-- ⚠️ Neither stops a secret pasted into a `.ts` or `.md` file, and nothing scans commits for secrets. The deny list is not verified to block shell commands such as `cat .env`, so don't rely on it.
+- Check: .gitignore ignores `.env` and `.env.*` (it un-ignores `.env.example`, which does not exist yet), `.auth/`, `*storageState*.json` and key files. .claude/settings.json denies Claude's Read tool access to `.env`, `.env.*` and login state, and denies Claude's file-editing tools (Edit, Write) on any `.env*` file (`Edit(.env*)`, Task 10). The pre-commit secret scan (G7) refuses staged secret files and four token patterns.
+- ⚠️ The deny rules cover only Claude's built-in file tools, not shell commands such as `cat .env`, so don't rely on them. The commit scan knows four token patterns only; a secret in another format pasted into a `.ts` or `.md` file still passes.
 
 ## G6. Keep isolated safety checks separate
 - Do: keep isolated checks in `safety/`, run by `npm run test:safety` (`node --test "safety/**/*.test.ts"`). They use no browser, no app URL and no network. Never put them under `tests/`.
@@ -83,7 +83,7 @@ CRITICAL, and what could break:
 | `scripts/jira-seed.mjs` | Unintended writes to Jira (G4) |
 | `CLAUDE.md`, `.claude/rules/01-guardrails.md` | A guardrail is weakened or lost |
 | `safety/target.test.ts`, `safety/helpers.test.ts`, `safety/types.check.ts`, `safety/support/child.ts`, `safety/fixtures/helpers-child.ts`, `safety/fixtures/playwright/playwright.config.ts`, `safety/fixtures/playwright/run-if-env.fixture.ts` | Proof of G1 and G2 disappears while the remaining checks still pass |
-| `safety-tests/guard.test.mjs`, `safety-tests/vault-log.test.mjs`, `safety-tests/worklog.test.mjs`, `safety-tests/git-hooks.test.mjs`, `safety-tests/vault-sync.test.mjs` | Proof of the hooks disappears while the remaining checks still pass |
+| `safety-tests/guard.test.mjs`, `safety-tests/vault-log.test.mjs`, `safety-tests/worklog.test.mjs`, `safety-tests/git-hooks.test.mjs`, `safety-tests/vault-sync.test.mjs`, `safety-tests/settings.test.mjs` | Proof of the hooks disappears while the remaining checks still pass |
 
 - SHARED: `pages/BasePage.ts` (parent of every Page Object), `pages/BlogListPage.ts`, `pages/LoginPage.ts`, `pages/CategoriesPage.ts`, `pages/ArticleDetailPage.ts`, `tests/support/users.ts` (D2), `tsconfig.json`, `eslint.config.mjs`, `lint-staged.config.mjs`, `scripts/lint-scope.mjs`, `.prettierrc.json`, `.prettierignore`, `.mcp.json`, `.github/CODEOWNERS`, `.claude/rules/10-playwright-pom.md`, `.claude/rules/20-data-management.md`, `.claude/rules/30-test-names.md`, `.claude/commands/worklog.md`, `README.md`, `jira-seed/README.md`, `jira-seed/jira-seed.json`, `jira-seed/jira-seed.schema.json`, `jira-seed/fixtures/*.json`, `evidence/task02-note.md` and `evidence/task04-note.md` (P9 names them as the verified test-ID record).
 - FULL CONTROL: `tests/blog/*.smoke.spec.ts` (nothing imports a spec), the other `evidence/task*-note.md`, `evidence/week2-baseline.md`, `vault/_map.md`, `vault/_raw/.gitkeep`, `vault/03-framework/hook-lifecycle-map.md`, `vault/12-progress-report/**`.

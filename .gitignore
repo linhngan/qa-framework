@@ -22,3 +22,5 @@ playwright/.cache/
 *.log
 .DS_Store
 Thumbs.db
+# Playwright MCP browser snapshots and console logs (local exploration output)
+.playwright-mcp/
