@@ -1,6 +1,6 @@
 # Task 11: spec-note generator, vault navigation, link checks and Git integration
 
-Date: 2026-10-26 · Branch: `week-2` (from `bb1646b`) · Stages 1 and 2. Not committed.
+Date: 2026-10-26 · Branch: `week-2` (from `bb1646b`) · Stages 1 and 2. Committed as `42384e8`, not pushed.
 
 The stage 1 sections below describe the state at the end of stage 1. At that point `--stage` exited 2 ("not available yet"), and there was no link checker, no `vault:validate` and no Git hook change. Stage 2 (at the end of this note) added all of them.
 
@@ -225,8 +225,17 @@ Seen live for every Claude Edit or Write of a CRITICAL file in stage 2: `scripts
 - In `pre-push-check.mjs`, `topLevel()` existed for one edit before `execFileSync` was imported. Nothing called it until the following edit, so no hook ran a broken path.
 - In `vault-sync.mjs`, new functions were added before their callers, so every intermediate file was valid.
 
+## The Task 11 commit itself (`42384e8`)
+- **Before staging:** the index was empty. `sessions.log` stayed ignored (`.gitignore:22: *.log`).
+- **Staged by explicit path:** 22 files, namely the Task 11 work and the two daily change logs `vault/_changelog/2026-10-25.md` and `2026-10-26.md`. The 2026-10-25 log also holds recorder lines from Tasks 08–10, because daily logs are committed whole. Not staged: `.playwright-mcp/` and `vault/12-progress-report/`.
+- **Commit:** exit 0 with the hooks enabled (`core.hooksPath=.husky/_`):
+  - the secret scan passed with no output;
+  - `spec-notes.mjs precheck` and `refresh` exited 0 with no output, because **no spec was staged**;
+  - lint-staged printed 10 `[COMPLETED]` lines (its own preparation and cleanup steps, plus ESLint and `prettier --check` on the staged `.ts`/`.mjs`/`.json`) and no failure.
+- **What this proves:** the new steps run in this repository and stay quiet when nothing is selected. It is **not** a live refresh: the first commit with a staged spec will be. That case was proven only in the disposable repository (S4–S6).
+
 ## Limits (stage 2)
-- The pre-commit steps have not yet run on a commit in this repository itself. They were proven in the disposable repository and the isolated tests.
+- A note refresh has not yet run on a commit in this repository itself. It was proven in the disposable repository and the isolated tests.
 - Staged notes are added after the secret scan has run. A note contains only the paths, hash and titles of a spec that was itself scanned in the same commit.
 - Link checks cover `vault/` only, not README or evidence notes.
 - Links must sit on one line. A label containing `]` is not parsed.
