@@ -7,7 +7,16 @@
 import { afterEach, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -207,17 +216,20 @@ describe('scan-staged and the Task 06 guard agree', () => {
 
 describe('pre-push-check', () => {
   let npmLog;
+  let rootLog;
 
-  // A fake npm on PATH: records each call; FAKE_NPM_FAIL names a script that fails.
+  // A fake npm on PATH: records each call (and the root given to vault:validate);
+  // FAKE_NPM_FAIL names a script that fails.
   beforeEach(() => {
     const bin = path.join(sandbox, 'bin');
     mkdirSync(bin);
     npmLog = path.join(sandbox, 'npm.log');
+    rootLog = path.join(sandbox, 'root.log');
     writeFileSync(npmLog, '');
     const fake = path.join(bin, 'npm');
     writeFileSync(
       fake,
-      `#!/bin/sh\nprintf '%s\\n' "$*" >> "${npmLog}"\n[ -n "$FAKE_NPM_FAIL" ] && [ "$2" = "$FAKE_NPM_FAIL" ] && exit 3\nexit 0\n`,
+      `#!/bin/sh\nprintf '%s\\n' "$*" >> "${npmLog}"\n[ "$2" = "vault:validate" ] && printf '%s' "$CLAUDE_PROJECT_DIR" > "${rootLog}"\n[ -n "$FAKE_NPM_FAIL" ] && [ "$2" = "$FAKE_NPM_FAIL" ] && exit 3\nexit 0\n`,
     );
     chmodSync(fake, 0o755);
     env.PATH = `${bin}${path.delimiter}${process.env.PATH}`;
@@ -235,10 +247,24 @@ describe('pre-push-check', () => {
   const npmCalls = () => readFileSync(npmLog, 'utf8').trim().split('\n').filter(Boolean);
   const line = (local, remote, localSha = SHA) => `${local} ${localSha} ${remote} ${ZERO}\n`;
 
-  it('allows a feature branch, then runs typecheck and the dev test listing', () => {
+  it('allows a feature branch, then runs typecheck, the dev test listing and the vault checks', () => {
     const result = prePush(line('refs/heads/week-2', 'refs/heads/week-2'));
     assert.equal(result.status, 0, result.stderr);
-    assert.deepEqual(npmCalls(), ['run typecheck', 'run test:list']);
+    assert.deepEqual(npmCalls(), ['run typecheck', 'run test:list', 'run vault:validate']);
+  });
+
+  it('pins vault:validate to this repository, not an inherited CLAUDE_PROJECT_DIR', () => {
+    const decoy = path.join(sandbox, 'decoy-project');
+    const result = prePush(line('refs/heads/week-2', 'refs/heads/week-2'), { CLAUDE_PROJECT_DIR: decoy });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(realpathSync(readFileSync(rootLog, 'utf8')), realpathSync(project));
+  });
+
+  it('fails when the vault checks fail', () => {
+    const result = prePush(line('refs/heads/week-2', 'refs/heads/week-2'), { FAKE_NPM_FAIL: 'vault:validate' });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /npm run vault:validate failed \(exit 3\)/);
+    assert.deepEqual(npmCalls(), ['run typecheck', 'run test:list', 'run vault:validate']);
   });
 
   it('refuses refs/heads/main even when the local branch has another name', () => {
@@ -267,7 +293,7 @@ describe('pre-push-check', () => {
     const result = prePush(line('refs/heads/main', 'refs/heads/main'), { ALLOW_MAIN_PUSH: '1' });
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stderr, /ALLOW_MAIN_PUSH=1 is set/);
-    assert.deepEqual(npmCalls(), ['run typecheck', 'run test:list']);
+    assert.deepEqual(npmCalls(), ['run typecheck', 'run test:list', 'run vault:validate']);
   });
 
   for (const value of ['true', 'yes', '0', '']) {

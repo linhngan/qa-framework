@@ -13,6 +13,8 @@ Node 24. From this folder: `npm ci`, then `npx playwright install chromium`
 - `npm run typecheck`: TypeScript check (TypeScript 6.0.3, the newest that typescript-eslint 8.64.0 supports)
 - `npm run lint`: ESLint, including our `.mjs` scripts
 - `npm run format:check` / `npm run format`: check or apply Prettier
+- `npm run vault:sync` / `npm run vault:check`: write or check the spec notes in `vault/tests/` (one per spec, parsed, never run)
+- `npm run vault:validate`: notes current and every local vault link resolves (also run by pre-push). It warns, without failing, about unlinked notes and about guides in `vault/03-framework/` without an H1
 - `npm run test:safety`: target and helper checks; no browser, no network
 
 ## Environments
@@ -64,11 +66,14 @@ whoever makes them.
 - pre-commit: scans the staged content of every staged file, new ones included, for secret
   files (`.env`, `.env.*`, `*.pem`, `*.key`, `*.p12`, `id_rsa`, `id_ed25519`) and the Task 06
   token patterns, naming file, line and kind but never the value. `.env.example` may be
-  staged, but its content is still scanned. Then lint-staged runs ESLint and a Prettier
-  check on the staged files.
+  staged, but its content is still scanned. Then it refuses unsafe spec staging: a partly
+  staged spec, a related note with unstaged edits, an untracked existing note, or a deleted
+  or renamed spec whose old note is not yet reviewed. Then lint-staged runs ESLint and a
+  Prettier check on the staged files. Last, it refreshes and stages only the staged specs'
+  notes in `vault/tests/`.
 - pre-push: refuses any push whose destination is `refs/heads/main`, even
-  `git push origin week-2:main`, then runs `npm run typecheck` and `npm run test:list`.
-  No browser starts.
+  `git push origin week-2:main`, then runs `npm run typecheck`, `npm run test:list` and
+  `npm run vault:validate`. No browser starts.
 - Example: `git add .env && git commit` stops with
   `pre-commit: BLOCKED — .env is a protected secret file (.env)…`.
 - Limit: hooks are local. They run only once `prepare` has activated them, and

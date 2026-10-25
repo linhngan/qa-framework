@@ -1,3 +1,4 @@
 # Task 08: refuse pushes to refs/heads/main, then typecheck and list the dev tests.
+# Task 11: then check every spec note and vault link (npm run vault:validate).
 # Git supplies the refs on stdin; the script reads them. Never bypass a failure (G7).
 node scripts/git-hooks/pre-push-check.mjs

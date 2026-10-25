@@ -16,6 +16,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:safety": "node --test \"safety/**/*.test.ts\" \"safety-tests/**/*.test.mjs\"",
+    "vault:sync": "node scripts/vault-sync.mjs --write",
+    "vault:check": "node scripts/vault-sync.mjs --check",
+    "vault:validate": "node scripts/vault-sync.mjs --check && node scripts/vault-sync.mjs --links",
     "prepare": "husky"
   },
   "devDependencies": {

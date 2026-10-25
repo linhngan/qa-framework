@@ -52,6 +52,7 @@ const CRITICAL_PATHS = [
   'scripts/vault-sync.mjs',
   'scripts/git-hooks/scan-staged.mjs',
   'scripts/git-hooks/pre-push-check.mjs',
+  'scripts/git-hooks/spec-notes.mjs',
   // Writes to Jira (G4)
   'scripts/jira-seed.mjs',
   // Project rules
@@ -69,6 +70,7 @@ const CRITICAL_PATHS = [
   'safety-tests/vault-log.test.mjs',
   'safety-tests/worklog.test.mjs',
   'safety-tests/git-hooks.test.mjs',
+  'safety-tests/vault-sync.test.mjs',
 ];
 const CRITICAL_KEYS = new Set(CRITICAL_PATHS.map((p) => p.toLowerCase()));
 const CRITICAL_WARNING = 'guard: WARN — shared file; review the affected callers before approving';

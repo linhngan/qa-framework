@@ -13,10 +13,12 @@
  *    to main. Course work never needs it: weeks reach main by reviewed PRs.
  * 2. Then runs `npm run typecheck` and `npm run test:list` (dev). Listing loads
  *    the config and specs but starts no browser and runs no test.
+ * 3. Then runs `npm run vault:validate` (Task 11): every spec note is current and
+ *    every local vault link resolves. Its root is pinned to this repository.
  *
  * Any refusal or failing command exits 1, and Git cancels the push.
  */
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
 const PROTECTED_REF = 'refs/heads/main';
@@ -30,9 +32,24 @@ function destinationRefs(stdin) {
     .map((fields) => fields[2]);
 }
 
-function run(command, args) {
+/** This repository's top level, so vault checks never follow an inherited CLAUDE_PROJECT_DIR. */
+function topLevel() {
+  try {
+    return execFileSync('git', ['rev-parse', '--show-toplevel'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).replace(/\n$/, '');
+  } catch {
+    return process.cwd();
+  }
+}
+
+function run(command, args, extraEnv = {}) {
   process.stderr.write(`pre-push: running ${[command, ...args].join(' ')}\n`);
-  const result = spawnSync(command, args, { stdio: ['ignore', 'inherit', 'inherit'] });
+  const result = spawnSync(command, args, {
+    stdio: ['ignore', 'inherit', 'inherit'],
+    env: { ...process.env, ...extraEnv },
+  });
   if (result.error) {
     process.stderr.write(`pre-push: BLOCKED — could not start ${command} (${result.error.message}).\n`);
     return false;
@@ -66,6 +83,7 @@ function main() {
 
   if (!run('npm', ['run', 'typecheck'])) return 1;
   if (!run('npm', ['run', 'test:list'])) return 1;
+  if (!run('npm', ['run', 'vault:validate'], { CLAUDE_PROJECT_DIR: topLevel() })) return 1;
   return 0;
 }
 

@@ -78,14 +78,16 @@ CRITICAL, and what could break:
 | `scripts/hooks/stop-worklog.mjs` | Every turn held open (it exits 2), or the journal reminder disappears |
 | `scripts/vault-sync.mjs` | The changelog stops recording, or records wrong lines |
 | `scripts/git-hooks/scan-staged.mjs` | Secret files or tokens get committed |
-| `scripts/git-hooks/pre-push-check.mjs` | A push to main, or with broken types, goes through |
+| `scripts/git-hooks/pre-push-check.mjs` | A push to main, or with broken types, stale spec notes or broken vault links, goes through |
+| `scripts/git-hooks/spec-notes.mjs` | A commit stages the wrong notes, overwrites unstaged work, or skips the staging-safety checks |
 | `scripts/jira-seed.mjs` | Unintended writes to Jira (G4) |
 | `CLAUDE.md`, `.claude/rules/01-guardrails.md` | A guardrail is weakened or lost |
 | `safety/target.test.ts`, `safety/helpers.test.ts`, `safety/types.check.ts`, `safety/support/child.ts`, `safety/fixtures/helpers-child.ts`, `safety/fixtures/playwright/playwright.config.ts`, `safety/fixtures/playwright/run-if-env.fixture.ts` | Proof of G1 and G2 disappears while the remaining checks still pass |
-| `safety-tests/guard.test.mjs`, `safety-tests/vault-log.test.mjs`, `safety-tests/worklog.test.mjs`, `safety-tests/git-hooks.test.mjs` | Proof of the hooks disappears while the remaining checks still pass |
+| `safety-tests/guard.test.mjs`, `safety-tests/vault-log.test.mjs`, `safety-tests/worklog.test.mjs`, `safety-tests/git-hooks.test.mjs`, `safety-tests/vault-sync.test.mjs` | Proof of the hooks disappears while the remaining checks still pass |
 
 - SHARED: `pages/BasePage.ts` (parent of every Page Object), `pages/BlogListPage.ts`, `pages/LoginPage.ts`, `pages/CategoriesPage.ts`, `pages/ArticleDetailPage.ts`, `tests/support/users.ts` (D2), `tsconfig.json`, `eslint.config.mjs`, `lint-staged.config.mjs`, `scripts/lint-scope.mjs`, `.prettierrc.json`, `.prettierignore`, `.mcp.json`, `.github/CODEOWNERS`, `.claude/rules/10-playwright-pom.md`, `.claude/rules/20-data-management.md`, `.claude/rules/30-test-names.md`, `.claude/commands/worklog.md`, `README.md`, `jira-seed/README.md`, `jira-seed/jira-seed.json`, `jira-seed/jira-seed.schema.json`, `jira-seed/fixtures/*.json`, `evidence/task02-note.md` and `evidence/task04-note.md` (P9 names them as the verified test-ID record).
 - FULL CONTROL: `tests/blog/*.smoke.spec.ts` (nothing imports a spec), the other `evidence/task*-note.md`, `evidence/week2-baseline.md`, `vault/_map.md`, `vault/_raw/.gitkeep`, `vault/03-framework/hook-lifecycle-map.md`, `vault/12-progress-report/**`.
+- Spec notes `vault/tests/**/*.md` are split: the block between `<!-- generated:start -->` and `<!-- generated:end -->` is GENERATED (`npm run vault:sync`), and the text outside it is FULL CONTROL. `vault/_context.md` is FULL CONTROL.
 - GENERATED: `vault/_changelog/*.md` (scripts/vault-sync.mjs), `package-lock.json` (npm), `jira-seed/jira-seed.md` (`node scripts/jira-seed.mjs --emit-md`), `.husky/_/` (husky), `playwright-report/`, `test-results/`, `.playwright-mcp/`. `evidence/*-raw-draft.ts` are archived and frozen: never edited, never regenerated.
 - Generated notes are regenerated: a hand edit is overwritten on the next run, or leaves the output disagreeing with its source. Fix the source (the JSON, the script, `package.json`) and regenerate.
 - Files under `tests/` or `pages/` are not FULL CONTROL just because they sit next to specs: `tests/support/users.ts` is SHARED, `tests/support/env.ts` is CRITICAL, and every Page Object is SHARED.

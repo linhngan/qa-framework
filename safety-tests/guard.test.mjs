@@ -331,7 +331,7 @@ describe('guard edge cases', () => {
 describe('guard critical-path warning (Task 09)', () => {
   const REPO = fileURLToPath(new URL('..', import.meta.url));
   const WARNING = 'guard: WARN — shared file; review the affected callers before approving';
-  // Same 30 paths as CRITICAL_PATHS in scripts/hooks/guard.mjs, kept in step by hand.
+  // Same 32 paths as CRITICAL_PATHS in scripts/hooks/guard.mjs, kept in step by hand.
   const CRITICAL = [
     'env/target.ts',
     'env/runIfEnv.ts',
@@ -349,6 +349,7 @@ describe('guard critical-path warning (Task 09)', () => {
     'scripts/vault-sync.mjs',
     'scripts/git-hooks/scan-staged.mjs',
     'scripts/git-hooks/pre-push-check.mjs',
+    'scripts/git-hooks/spec-notes.mjs',
     'scripts/jira-seed.mjs',
     'CLAUDE.md',
     '.claude/rules/01-guardrails.md',
@@ -363,6 +364,7 @@ describe('guard critical-path warning (Task 09)', () => {
     'safety-tests/vault-log.test.mjs',
     'safety-tests/worklog.test.mjs',
     'safety-tests/git-hooks.test.mjs',
+    'safety-tests/vault-sync.test.mjs',
   ];
   const HOOK_CLASS = [
     'scripts/hooks/guard.mjs',
@@ -399,7 +401,7 @@ describe('guard critical-path warning (Task 09)', () => {
     });
 
   it('every listed path exists in the project', () => {
-    assert.equal(CRITICAL.length, 30);
+    assert.equal(CRITICAL.length, 32);
     for (const rel of CRITICAL) assert.ok(existsSync(path.join(REPO, rel)), `${rel} exists`);
   });
 
