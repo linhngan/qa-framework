@@ -4,7 +4,8 @@
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./**/.auth/**)",
-      "Read(./**/*storageState*.json)"
+      "Read(./**/*storageState*.json)",
+      "Edit(.env*)"
     ],
     "ask": [
       "Bash(git push *)",
@@ -14,7 +15,8 @@
       "Bash(npm test)",
       "Bash(npm run test:list)",
       "Bash(npm run typecheck)",
-      "Bash(npm run test:safety)"
+      "Bash(npm run test:safety)",
+      "Bash(npm run lint)"
     ]
   },
   "hooks": {
