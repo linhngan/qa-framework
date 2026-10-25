@@ -48,6 +48,11 @@ Three layers, each with a different reach. None of them replaces review.
 - Example: G2 says every data-changing spec starts with `runIfEnv(test, ['dev'])`.
 - Limit: a rule is an instruction, not a lock. Items marked ⚠️ in the rule files have no check.
 
+**Change tiers** (G8 in .claude/rules/01-guardrails.md): CRITICAL, SHARED, FULL CONTROL, GENERATED.
+- Example: before approving a rename in a SHARED Page Object, write a CROSS-IMPACT line for each caller.
+  For a CRITICAL file, the guard adds the reminder `guard: WARN — shared file; review the affected callers before approving`.
+- Limit: the guard's coded list is kept by hand, so editing the table does not change it. Only CRITICAL files get the warning.
+
 **Claude hooks** (.claude/settings.json, scripts/hooks/) run around Claude Code's own actions.
 - Example: the PreToolUse guard refuses a Claude Edit that adds `.only` to a spec, before
   the file changes. Other hooks record edits in vault/_changelog/ and remind about the journal.

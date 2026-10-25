@@ -5,6 +5,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -322,5 +323,158 @@ describe('guard edge cases', () => {
 
   it('known limit: filename matching is case-sensitive', () => {
     assertAllowed(runGuard(write('.ENV', 'X=1\n')));
+  });
+});
+
+// Task 09: an allowed Edit or Write of a CRITICAL path prints one JSON reminder on
+// stdout and exits 0. Every payload below is simulated; no critical file is edited.
+describe('guard critical-path warning (Task 09)', () => {
+  const REPO = fileURLToPath(new URL('..', import.meta.url));
+  const WARNING = 'guard: WARN — shared file; review the affected callers before approving';
+  // Same 30 paths as CRITICAL_PATHS in scripts/hooks/guard.mjs, kept in step by hand.
+  const CRITICAL = [
+    'env/target.ts',
+    'env/runIfEnv.ts',
+    'env/envGuard.ts',
+    'tests/support/env.ts',
+    'playwright.config.ts',
+    'package.json',
+    '.gitignore',
+    '.claude/settings.json',
+    '.husky/pre-commit',
+    '.husky/pre-push',
+    'scripts/hooks/guard.mjs',
+    'scripts/hooks/session-preflight.mjs',
+    'scripts/hooks/stop-worklog.mjs',
+    'scripts/vault-sync.mjs',
+    'scripts/git-hooks/scan-staged.mjs',
+    'scripts/git-hooks/pre-push-check.mjs',
+    'scripts/jira-seed.mjs',
+    'CLAUDE.md',
+    '.claude/rules/01-guardrails.md',
+    'safety/target.test.ts',
+    'safety/helpers.test.ts',
+    'safety/types.check.ts',
+    'safety/support/child.ts',
+    'safety/fixtures/helpers-child.ts',
+    'safety/fixtures/playwright/playwright.config.ts',
+    'safety/fixtures/playwright/run-if-env.fixture.ts',
+    'safety-tests/guard.test.mjs',
+    'safety-tests/vault-log.test.mjs',
+    'safety-tests/worklog.test.mjs',
+    'safety-tests/git-hooks.test.mjs',
+  ];
+  const HOOK_CLASS = [
+    'scripts/hooks/guard.mjs',
+    'scripts/hooks/session-preflight.mjs',
+    'scripts/hooks/stop-worklog.mjs',
+    'scripts/vault-sync.mjs',
+    'scripts/git-hooks/scan-staged.mjs',
+    'scripts/git-hooks/pre-push-check.mjs',
+  ];
+
+  function assertWarned(result) {
+    assert.equal(result.status, 0, `exit code (stderr: ${result.stderr})`);
+    assert.equal(result.stderr, '');
+    assert.ok(result.stdout.endsWith('\n') && !result.stdout.slice(0, -1).includes('\n'), 'one stdout line');
+    const output = JSON.parse(result.stdout);
+    assert.deepEqual(output, {
+      systemMessage: WARNING,
+      hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: WARNING },
+    });
+    assert.ok(!result.stdout.includes('permissionDecision'), 'no permission decision');
+  }
+
+  const editAt = (filePath) =>
+    JSON.stringify({
+      hook_event_name: 'PreToolUse',
+      tool_name: 'Edit',
+      tool_input: { file_path: filePath, old_string: 'a\n', new_string: 'b\n' },
+    });
+  const writeAt = (filePath) =>
+    JSON.stringify({
+      hook_event_name: 'PreToolUse',
+      tool_name: 'Write',
+      tool_input: { file_path: filePath, content: 'x\n' },
+    });
+
+  it('every listed path exists in the project', () => {
+    assert.equal(CRITICAL.length, 30);
+    for (const rel of CRITICAL) assert.ok(existsSync(path.join(REPO, rel)), `${rel} exists`);
+  });
+
+  it('includes the reviewed additional class: the six hook and automation scripts', () => {
+    for (const rel of HOOK_CLASS) assert.ok(CRITICAL.includes(rel), `${rel} is listed`);
+    for (const rel of HOOK_CLASS) assertWarned(runGuard(edit(rel, 'a\n', 'b\n')));
+  });
+
+  for (const rel of CRITICAL) {
+    it(`warns for an allowed Edit and Write of ${rel}`, () => {
+      assertWarned(runGuard(edit(rel, 'a\n', 'b\n')));
+      assertWarned(runGuard(write(rel, 'x\n')));
+    });
+  }
+
+  it('normalizes the path: relative, ./, .., backslashes, case, a Windows-style root', () => {
+    assertWarned(runGuard(editAt('env/target.ts')));
+    assertWarned(runGuard(editAt('./env/target.ts')));
+    assertWarned(runGuard(editAt(path.join(ROOT, 'env', '..', 'env', 'target.ts'))));
+    assertWarned(runGuard(editAt(`${ROOT}/scripts/hooks/../hooks/guard.mjs`)));
+    assertWarned(runGuard(editAt('env\\target.ts')));
+    assertWarned(runGuard(editAt(path.join(ROOT, 'ENV', 'Target.ts'))));
+    assertWarned(runGuard(writeAt(`${ROOT}/.claude/settings.json`)));
+    assertWarned(
+      runGuard(editAt('C:\\work\\qa-framework\\env\\envGuard.ts'), {
+        env: { PATH: process.env.PATH, CLAUDE_PROJECT_DIR: 'C:\\work\\qa-framework\\' },
+      }),
+    );
+  });
+
+  it('ordinary edits stay silent: a spec, a SHARED Page Object, a FULL CONTROL note', () => {
+    assertAllowed(runGuard(edit(SPEC, 'a\n', 'b\n')));
+    assertAllowed(runGuard(edit('pages/BlogListPage.ts', 'a\n', 'b\n')));
+    assertAllowed(runGuard(edit('pages/LoginPage.ts', 'a\n', 'b\n')));
+    assertAllowed(runGuard(edit('tests/support/users.ts', 'a\n', 'b\n')));
+    assertAllowed(runGuard(write('evidence/task09-note.md', '# note\n')));
+  });
+
+  it('look-alike and outside paths stay silent', () => {
+    for (const rel of [
+      'env/target.ts.bak',
+      'env/target.tsx',
+      'tests/env/target.ts',
+      'other/env/target.ts',
+      'safety-tests/guard.test.mjs.orig',
+      '.husky/_/pre-commit',
+    ]) {
+      assertAllowed(runGuard(edit(rel, 'a\n', 'b\n')));
+    }
+    assertAllowed(runGuard(editAt(path.join(tmpdir(), 'elsewhere', 'env', 'target.ts'))));
+    assertAllowed(runGuard(editAt('../env/target.ts')));
+    assertAllowed(runGuard(editAt(`${ROOT}-copy/env/target.ts`)));
+  });
+
+  it('other tools and malformed input on a critical path stay silent', () => {
+    for (const tool of ['Read', 'Bash', 'MultiEdit']) {
+      assertAllowed(
+        runGuard(JSON.stringify({ tool_name: tool, tool_input: { file_path: abs('env/target.ts'), command: 'x' } })),
+      );
+    }
+    assertAllowed(runGuard(JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: abs('env/target.ts') } })));
+    assertAllowed(runGuard('{not json'));
+  });
+
+  it('refusals come first: a critical path with a secret is refused, with no JSON on stdout', () => {
+    assertBlocked(runGuard(write('scripts/hooks/guard.mjs', SAMPLES[3].token)), 'looks like a private key');
+    assertBlocked(
+      runGuard(edit('env/target.ts', 'a\n', `'${SAMPLES[1].token}'\n`)),
+      'looks like an Atlassian API token',
+    );
+    assertBlocked(runGuard(edit('.claude/settings.json', 'a\n', SAMPLES[0].token)), 'looks like a Slack bot token');
+  });
+
+  it('known limit: checks 3–7 cover only *.spec.ts, and no spec is critical, so they never meet the warning', () => {
+    assert.ok(!CRITICAL.some((rel) => rel.endsWith('.spec.ts')));
+    assertWarned(runGuard(edit('env/runIfEnv.ts', "  test.skip(!ok, 'x');\n", "  test.skip(true, 'x');\n")));
   });
 });

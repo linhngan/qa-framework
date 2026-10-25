@@ -48,3 +48,53 @@ Applies to the whole project, always. ⚠️ marks a mistake that our current ch
 - When: every `git commit` and `git push`, including fixups and amends.
 - Check: .husky/pre-commit scans staged content for secret files and tokens (G5), then runs lint-staged. .husky/pre-push refuses refs/heads/main, then runs `npm run typecheck` and `npm run test:list`. `npm run test:safety` covers both scripts.
 - ⚠️ Git hooks are local: they run only after `npm install` activates them (`prepare`), and `--no-verify` or `HUSKY=0` skips them silently. Nothing on GitHub repeats these checks yet (no CI).
+
+## G8. Change tiers and cross-impact
+- Do: before proposing a change, find the file's tier below and follow that tier's steps. A file not listed is SHARED until classified.
+- When: every Edit or Write of a project file, by Claude or a person.
+
+| Tier | Meaning | Before approving a change |
+|---|---|---|
+| CRITICAL | A safety control, its wiring or its proof | Human approval with the exact change; say what could break (table below); `npm run test:safety` with new or updated checks, never weakened; a live re-check of the affected control; its own commit |
+| SHARED | Imported or read by more than one file | A CROSS-IMPACT record for every use site, then `npm run typecheck`, `npm run lint` and the affected specs |
+| FULL CONTROL | Nothing depends on it | Edit freely. G1–G7 and the guard's seven refusal checks still apply |
+| GENERATED | Written by a tool | Never edit by hand. Change the source or the generator and regenerate |
+
+CRITICAL, and what could break:
+
+| Path | What could break |
+|---|---|
+| `env/target.ts` | Wrong target or prod by accident; the pinned target changes mid-run |
+| `env/runIfEnv.ts` | Data-changing specs run on prod, or every test silently skips |
+| `env/envGuard.ts` | A write runs on prod |
+| `tests/support/env.ts` | Imported by nothing today; if reused or edited, it could resolve the target differently from `getTarget()` |
+| `playwright.config.ts` | Retries hide failures, `testDir` drops tests, `baseURL` stops coming from `getTarget()` |
+| `package.json` | `npm test` loses `APP_ENV=dev`, `prepare` stops activating Husky, `test:safety` misses checks |
+| `.gitignore` | `.env`, `.auth/` or key files become committable |
+| `.claude/settings.json` | Claude hooks unwired, deny/ask lists changed, with no error |
+| `.husky/pre-commit`, `.husky/pre-push` | Secret scan, lint-staged or the main-push refusal stops running |
+| `scripts/hooks/guard.mjs` | Claude edits stop being refused or warned, silently (it fails open) |
+| `scripts/hooks/session-preflight.mjs` | Wrong session-start facts |
+| `scripts/hooks/stop-worklog.mjs` | Every turn held open (it exits 2), or the journal reminder disappears |
+| `scripts/vault-sync.mjs` | The changelog stops recording, or records wrong lines |
+| `scripts/git-hooks/scan-staged.mjs` | Secret files or tokens get committed |
+| `scripts/git-hooks/pre-push-check.mjs` | A push to main, or with broken types, goes through |
+| `scripts/jira-seed.mjs` | Unintended writes to Jira (G4) |
+| `CLAUDE.md`, `.claude/rules/01-guardrails.md` | A guardrail is weakened or lost |
+| `safety/target.test.ts`, `safety/helpers.test.ts`, `safety/types.check.ts`, `safety/support/child.ts`, `safety/fixtures/helpers-child.ts`, `safety/fixtures/playwright/playwright.config.ts`, `safety/fixtures/playwright/run-if-env.fixture.ts` | Proof of G1 and G2 disappears while the remaining checks still pass |
+| `safety-tests/guard.test.mjs`, `safety-tests/vault-log.test.mjs`, `safety-tests/worklog.test.mjs`, `safety-tests/git-hooks.test.mjs` | Proof of the hooks disappears while the remaining checks still pass |
+
+- SHARED: `pages/BasePage.ts` (parent of every Page Object), `pages/BlogListPage.ts`, `pages/LoginPage.ts`, `pages/CategoriesPage.ts`, `pages/ArticleDetailPage.ts`, `tests/support/users.ts` (D2), `tsconfig.json`, `eslint.config.mjs`, `lint-staged.config.mjs`, `scripts/lint-scope.mjs`, `.prettierrc.json`, `.prettierignore`, `.mcp.json`, `.github/CODEOWNERS`, `.claude/rules/10-playwright-pom.md`, `.claude/rules/20-data-management.md`, `.claude/rules/30-test-names.md`, `.claude/commands/worklog.md`, `README.md`, `jira-seed/README.md`, `jira-seed/jira-seed.json`, `jira-seed/jira-seed.schema.json`, `jira-seed/fixtures/*.json`, `evidence/task02-note.md` and `evidence/task04-note.md` (P9 names them as the verified test-ID record).
+- FULL CONTROL: `tests/blog/*.smoke.spec.ts` (nothing imports a spec), the other `evidence/task*-note.md`, `evidence/week2-baseline.md`, `vault/_map.md`, `vault/_raw/.gitkeep`, `vault/03-framework/hook-lifecycle-map.md`, `vault/12-progress-report/**`.
+- GENERATED: `vault/_changelog/*.md` (scripts/vault-sync.mjs), `package-lock.json` (npm), `jira-seed/jira-seed.md` (`node scripts/jira-seed.mjs --emit-md`), `.husky/_/` (husky), `playwright-report/`, `test-results/`, `.playwright-mcp/`. `evidence/*-raw-draft.ts` are archived and frozen: never edited, never regenerated.
+- Generated notes are regenerated: a hand edit is overwritten on the next run, or leaves the output disagreeing with its source. Fix the source (the JSON, the script, `package.json`) and regenerate.
+- Files under `tests/` or `pages/` are not FULL CONTROL just because they sit next to specs: `tests/support/users.ts` is SHARED, `tests/support/env.ts` is CRITICAL, and every Page Object is SHARED.
+
+CROSS-IMPACT format, one line per use site:
+```
+changed symbol -> used-by file:line -> breaking / behavioral / safe -> action
+```
+breaking: does not compile or run unless the caller changes. behavioral: still runs but does something different. safe: no effect.
+
+- Check: for every CRITICAL path, the PreToolUse guard prints `guard: WARN — shared file; review the affected callers before approving` (stdout JSON, exit 0) after its seven refusal checks pass. `npm run test:safety` covers the list, path normalization, quiet ordinary edits and refusal priority.
+- ⚠️ The guard reads its own coded list (`CRITICAL_PATHS` in scripts/hooks/guard.mjs). Editing this table does not update that list, and editing the list does not update this table: change both together. The warning covers only Claude's Edit and Write tools, not shell commands. It never warns for SHARED files, and it fails open, so an error silently drops it. The warning does not enforce approval: it exits 0, never asks for or records a decision, and the edit goes ahead under whatever permission mode is active. Human approval for a CRITICAL change is a process step that only review of the transcript or PR can confirm.

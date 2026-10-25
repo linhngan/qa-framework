@@ -61,6 +61,7 @@ Before an Edit or Write runs, Claude Code pipes the proposed call to `scripts/ho
   - a marker already in the old text is not reported again;
   - checks 3–7 cover only `*.spec.ts`;
   - matching is plain substrings: a space in `waitForTimeout (500)` is not matched, while `.only` in a comment is.
+- **Critical-path warning (Task 09):** when none of the seven checks refuses and the file is on the guard's coded `CRITICAL_PATHS` list (30 paths, G8 in .claude/rules/01-guardrails.md), the guard exits 0 and prints one JSON object on stdout: `systemMessage` and `hookSpecificOutput.additionalContext` both carry `guard: WARN — shared file; review the affected callers before approving`, with `hookEventName: "PreToolUse"` and no `permissionDecision`, so the normal permission prompt still decides. Paths are matched relative to the project root, with `\` → `/`, `.`/`..` resolved and case ignored. The list is kept by hand: the G8 table does not update it. Seen live on 2026-10-25 for Claude Edits of `safety-tests/guard.test.mjs` and `.claude/rules/01-guardrails.md`, shown as "PreToolUse:Edit hook additional context: guard: WARN — …".
 
 Exit 2 with one `guard: BLOCKED — …` line refuses the call. Per the official hooks reference, that stderr line becomes the reason given to Claude. Anything else exits 0 silently. Details and messages: evidence/task06-note.md.
 

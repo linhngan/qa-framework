@@ -5,13 +5,18 @@
  *   node scripts/hooks/guard.mjs   read the hook's event JSON on stdin
  *
  * A refused proposal exits 2 with one "guard: BLOCKED — …" line on stderr.
- * Everything else exits 0 silently. The guard examines only the supplied JSON:
- * it never opens the target file and never applies the edit.
+ * An allowed Edit or Write of a CRITICAL path (Task 09) exits 0 and prints one JSON
+ * object on stdout with a review reminder; it never returns a permission decision,
+ * so the normal permission prompt still decides. Everything else exits 0 silently.
+ * The guard examines only the supplied JSON: it never opens the target file and
+ * never applies the edit.
  *
  * This is a course guard and it fails open. Malformed or unreadable input, an
- * unexpected error, or a hook that does not run at all lets the edit through.
+ * unexpected error, or a hook that does not run at all lets the edit through,
+ * without a warning.
  */
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 // Assembled from pieces so this file never contains the detector strings itself.
 const SECRET_MARKERS = [
@@ -23,6 +28,50 @@ const SECRET_MARKERS = [
 
 const PROTECTED_NAMES = ['.env', 'id_rsa', 'id_ed25519'];
 const PROTECTED_EXTENSIONS = ['.pem', '.key', '.p12'];
+
+// CRITICAL paths (G8 in .claude/rules/01-guardrails.md), relative to the project root.
+// Maintained by hand: editing the G8 table does not update this list, and editing
+// this list does not update the table. Exact files only, no folders or globs.
+const CRITICAL_PATHS = [
+  // Environment selection and write protection (G1, G2, G3)
+  'env/target.ts',
+  'env/runIfEnv.ts',
+  'env/envGuard.ts',
+  'tests/support/env.ts',
+  'playwright.config.ts',
+  'package.json',
+  '.gitignore',
+  // Hook wiring
+  '.claude/settings.json',
+  '.husky/pre-commit',
+  '.husky/pre-push',
+  // Hook and automation scripts (Task 09 additional class)
+  'scripts/hooks/guard.mjs',
+  'scripts/hooks/session-preflight.mjs',
+  'scripts/hooks/stop-worklog.mjs',
+  'scripts/vault-sync.mjs',
+  'scripts/git-hooks/scan-staged.mjs',
+  'scripts/git-hooks/pre-push-check.mjs',
+  // Writes to Jira (G4)
+  'scripts/jira-seed.mjs',
+  // Project rules
+  'CLAUDE.md',
+  '.claude/rules/01-guardrails.md',
+  // Proof of the controls above
+  'safety/target.test.ts',
+  'safety/helpers.test.ts',
+  'safety/types.check.ts',
+  'safety/support/child.ts',
+  'safety/fixtures/helpers-child.ts',
+  'safety/fixtures/playwright/playwright.config.ts',
+  'safety/fixtures/playwright/run-if-env.fixture.ts',
+  'safety-tests/guard.test.mjs',
+  'safety-tests/vault-log.test.mjs',
+  'safety-tests/worklog.test.mjs',
+  'safety-tests/git-hooks.test.mjs',
+];
+const CRITICAL_KEYS = new Set(CRITICAL_PATHS.map((p) => p.toLowerCase()));
+const CRITICAL_WARNING = 'guard: WARN — shared file; review the affected callers before approving';
 
 function count(text, needle) {
   return text.split(needle).length - 1;
@@ -41,8 +90,8 @@ function displayPath(filePath) {
   return normalized.startsWith(`${root}/`) ? normalized.slice(root.length + 1) : normalized;
 }
 
-/** Returns the refusal reason, or null to allow (including malformed input). */
-function decide(event) {
+/** The Edit or Write being proposed, or null when the input is not one (or is malformed). */
+function proposal(event) {
   if (!event || typeof event !== 'object') return null;
   const input = event.tool_input;
   if (!input || typeof input !== 'object') return null;
@@ -61,7 +110,38 @@ function decide(event) {
   const filePath = input.file_path;
   if (typeof filePath !== 'string' || filePath === '') return null;
   if (typeof oldText !== 'string' || typeof newText !== 'string') return null;
+  return { toolName: event.tool_name, filePath, oldText, newText };
+}
 
+/**
+ * Project-relative path with forward slashes, `.` and `..` resolved, or null when
+ * the file is outside the project. Relative input is taken as relative to the root.
+ * Case is ignored, so a mis-cased path on macOS or Windows still matches.
+ */
+function projectKey(filePath) {
+  const root = path.posix.normalize(
+    (process.env.CLAUDE_PROJECT_DIR || process.cwd()).replace(/\\/g, '/').replace(/\/+$/, ''),
+  );
+  let rel = filePath.replace(/\\/g, '/');
+  const isAbsolute = rel.startsWith('/') || /^[A-Za-z]:\//.test(rel);
+  if (isAbsolute) {
+    rel = path.posix.normalize(rel);
+    if (!rel.toLowerCase().startsWith(`${root.toLowerCase()}/`)) return null;
+    rel = rel.slice(root.length + 1);
+  }
+  rel = path.posix.normalize(rel);
+  if (rel === '..' || rel.startsWith('../') || rel.startsWith('/')) return null;
+  return rel.toLowerCase();
+}
+
+function isCritical(edit) {
+  const key = projectKey(edit.filePath);
+  return key !== null && CRITICAL_KEYS.has(key);
+}
+
+/** Returns the refusal reason, or null to allow. */
+function decide(edit) {
+  const { filePath, oldText, newText } = edit;
   const shown = displayPath(filePath);
   const base = shown.split('/').pop();
 
@@ -83,7 +163,7 @@ function decide(event) {
   if (newText.includes('waitForTimeout(') && !oldText.includes('waitForTimeout(')) {
     return `${shown} would gain waitForTimeout(, a fixed wait that passes or fails on timing. Wait for the condition the test actually needs instead: an auto-waiting expect(...) assertion such as toBeVisible(), or page.waitForURL() (P6).`;
   }
-  if (event.tool_name !== 'Edit') return null; // removals need an old-text baseline
+  if (edit.toolName !== 'Edit') return null; // removals need an old-text baseline
 
   const removed = (needle) => {
     const before = count(oldText, needle);
@@ -113,11 +193,21 @@ try {
   } catch {
     event = null; // malformed or unreadable input: allow silently
   }
-  const reason = decide(event);
+  const edit = proposal(event);
+  const reason = edit ? decide(edit) : null;
   if (reason) {
     process.stderr.write(`guard: BLOCKED — ${reason}\n`);
     process.exitCode = 2;
   } else {
+    // The seven refusal checks ran first; only an allowed CRITICAL edit is reminded.
+    if (edit && isCritical(edit)) {
+      process.stdout.write(
+        `${JSON.stringify({
+          systemMessage: CRITICAL_WARNING,
+          hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: CRITICAL_WARNING },
+        })}\n`,
+      );
+    }
     process.exitCode = 0;
   }
 } catch {
