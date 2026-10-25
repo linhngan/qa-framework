@@ -57,7 +57,9 @@ function run(script, args = [], input = '', options = {}) {
 }
 
 function localToday(timeZone = TZ) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+    new Date(),
+  );
 }
 
 function journal(slug = 'test-student') {
@@ -146,7 +148,7 @@ describe('session-preflight', () => {
 });
 
 describe('stop-worklog --path and slug', () => {
-  it('--path prints today\'s journal path without reading stdin', () => {
+  it("--path prints today's journal path without reading stdin", () => {
     makeRepo();
     const result = run(WORKLOG, ['--path'], undefined, { stdio: ['ignore', 'pipe', 'pipe'] });
     assert.equal(result.status, 0);
@@ -181,7 +183,7 @@ describe('stop-worklog decisions', () => {
     assertAllowed(run(WORKLOG, [], STOP));
   });
 
-  it('activity without today\'s heading → 2, naming the exact path and /worklog', () => {
+  it("activity without today's heading → 2, naming the exact path and /worklog", () => {
     makeRepo({ commit: false });
     put('notes.md');
     assertReminder(run(WORKLOG, [], STOP));
@@ -217,7 +219,7 @@ describe('stop-worklog decisions', () => {
   it('removes all leading byte-order marks before parsing', () => {
     makeRepo({ commit: false });
     put('notes.md');
-    assertReminder(run(WORKLOG, [], `﻿﻿${STOP}`));
+    assertReminder(run(WORKLOG, [], `\uFEFF\uFEFF${STOP}`));
   });
 
   it('a nested untracked qualifying file in a new folder counts as activity → 2', () => {
@@ -260,7 +262,11 @@ describe('stop-worklog decisions', () => {
     const localMidnight = Date.UTC(y, m - 1, d) / 1000 - 14 * 3600;
     const seconds = localMidnight + 60;
     assert.ok(seconds <= Date.now() / 1000, 'test needs the current time to be past 00:01 local in Kiritimati');
-    assert.notEqual(new Date(seconds * 1000).toISOString().slice(0, 10), localToday(TZ), 'sample is on a different UTC day');
+    assert.notEqual(
+      new Date(seconds * 1000).toISOString().slice(0, 10),
+      localToday(TZ),
+      'sample is on a different UTC day',
+    );
     makeRepo({ commit: false });
     commitAt(seconds, 'just after local midnight');
     assertReminder(run(WORKLOG, [], STOP));

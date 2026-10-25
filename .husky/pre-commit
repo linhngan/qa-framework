@@ -1,0 +1,4 @@
+# Task 08: scan the staged content for secret files and tokens, then lint and
+# format-check the staged files. Never bypass a failure (G7).
+node scripts/git-hooks/scan-staged.mjs || exit 1
+npx --no-install lint-staged

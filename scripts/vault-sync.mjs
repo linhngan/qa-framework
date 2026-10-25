@@ -66,7 +66,7 @@ function readStdin() {
 function projectPath(raw) {
   let data;
   try {
-    data = JSON.parse(raw.replace(/^﻿+/, ''));
+    data = JSON.parse(raw.replace(/^\uFEFF+/, ''));
   } catch {
     return null;
   }

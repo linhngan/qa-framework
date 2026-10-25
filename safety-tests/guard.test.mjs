@@ -49,7 +49,11 @@ function edit(file, oldString, newString) {
 }
 
 function write(file, content, filePath = abs(file)) {
-  return JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Write', tool_input: { file_path: filePath, content } });
+  return JSON.stringify({
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: { file_path: filePath, content },
+  });
 }
 
 function assertBlocked(result, ...fragments) {
@@ -57,7 +61,8 @@ function assertBlocked(result, ...fragments) {
   assert.equal(result.stdout, '');
   assert.ok(result.stderr.startsWith(PREFIX), `reason starts with the prefix: ${result.stderr}`);
   assert.ok(result.stderr.endsWith('\n') && !result.stderr.slice(0, -1).includes('\n'), 'exactly one stderr line');
-  for (const fragment of fragments) assert.ok(result.stderr.includes(fragment), `reason mentions ${fragment}: ${result.stderr}`);
+  for (const fragment of fragments)
+    assert.ok(result.stderr.includes(fragment), `reason mentions ${fragment}: ${result.stderr}`);
 }
 
 function assertAllowed(result) {
@@ -83,10 +88,24 @@ describe('guard quick sample', () => {
 
 describe('guard initial checks: one blocked and one allowed example each', () => {
   it('1 protected filename, blocked: .env, .env.*, *.pem, *.key, *.p12, id_rsa, id_ed25519, Windows separators', () => {
-    for (const file of ['.env', '.env.local', 'certs/server.pem', 'config/api.key', 'keys/client.p12', '.ssh/id_rsa', '.ssh/id_ed25519']) {
-      assertBlocked(runGuard(write(file, 'PLACEHOLDER\n')), `${file} is a protected secret file (${path.basename(file)})`);
+    for (const file of [
+      '.env',
+      '.env.local',
+      'certs/server.pem',
+      'config/api.key',
+      'keys/client.p12',
+      '.ssh/id_rsa',
+      '.ssh/id_ed25519',
+    ]) {
+      assertBlocked(
+        runGuard(write(file, 'PLACEHOLDER\n')),
+        `${file} is a protected secret file (${path.basename(file)})`,
+      );
     }
-    assertBlocked(runGuard(write('', 'X=1\n', 'C:\\work\\project\\.env')), 'C:/work/project/.env is a protected secret file (.env)');
+    assertBlocked(
+      runGuard(write('', 'X=1\n', 'C:\\work\\project\\.env')),
+      'C:/work/project/.env is a protected secret file (.env)',
+    );
     assertBlocked(runGuard(edit('.env.local', 'A=1\n', 'A=2\n')), '.env.local is a protected secret file');
   });
 
@@ -97,7 +116,10 @@ describe('guard initial checks: one blocked and one allowed example each', () =>
 
   it('2 secret-looking new content, blocked: each detector kind, in Write content and Edit new_string', () => {
     for (const { kind, token } of SAMPLES) {
-      for (const input of [write('notes/sample.md', `value: ${token}\n`), edit('notes/sample.md', 'value: TBD\n', `value: ${token}\n`)]) {
+      for (const input of [
+        write('notes/sample.md', `value: ${token}\n`),
+        edit('notes/sample.md', 'value: TBD\n', `value: ${token}\n`),
+      ]) {
         const result = runGuard(input);
         assertBlocked(result, `new text for notes/sample.md looks like ${kind}`);
         assert.ok(!result.stderr.includes(token.trim()), 'the reason never repeats the sample');
@@ -111,16 +133,22 @@ describe('guard initial checks: one blocked and one allowed example each', () =>
   });
 
   it('3 .only added to a spec, blocked', () => {
-    const result = runGuard(edit(SPEC, "  test('banner is visible', async () => {\n", "  test.only('banner is visible', async () => {\n"));
+    const result = runGuard(
+      edit(SPEC, "  test('banner is visible', async () => {\n", "  test.only('banner is visible', async () => {\n"),
+    );
     assertBlocked(result, `${SPEC} would gain .only`);
   });
 
   it('3 .only, allowed: spec edit without .only', () => {
-    assertAllowed(runGuard(edit(SPEC, "  test('banner is visible', async () => {\n", "  test('banner is shown', async () => {\n")));
+    assertAllowed(
+      runGuard(edit(SPEC, "  test('banner is visible', async () => {\n", "  test('banner is shown', async () => {\n")),
+    );
   });
 
   it('4 .skip added to a spec, blocked', () => {
-    const result = runGuard(edit(SPEC, "  test('banner is visible', async () => {\n", "  test.skip('banner is visible', async () => {\n"));
+    const result = runGuard(
+      edit(SPEC, "  test('banner is visible', async () => {\n", "  test.skip('banner is visible', async () => {\n"),
+    );
     assertBlocked(result, `${SPEC} would gain .skip`);
   });
 
@@ -134,8 +162,10 @@ describe('guard initial checks: one blocked and one allowed example each', () =>
   });
 
   it('5 fewer expect( calls, allowed: a combined edit that moves an assertion keeps its count', () => {
-    const oldString = "    await expect(blog.banner).toBeVisible();\n    await expect(blog.banner).toContainText('DEVELOPMENT');\n";
-    const newString = "    await expect(blog.banner).toContainText('DEVELOPMENT');\n    await expect(blog.banner).toBeVisible();\n";
+    const oldString =
+      "    await expect(blog.banner).toBeVisible();\n    await expect(blog.banner).toContainText('DEVELOPMENT');\n";
+    const newString =
+      "    await expect(blog.banner).toContainText('DEVELOPMENT');\n    await expect(blog.banner).toBeVisible();\n";
     assertAllowed(runGuard(edit(SPEC, oldString, newString)));
   });
 
@@ -145,7 +175,9 @@ describe('guard initial checks: one blocked and one allowed example each', () =>
       'removes runIfEnv( calls (old 1, new 0)',
     );
     assertBlocked(
-      runGuard(edit(SPEC, '    await envGuard(() => article.postComment(text));\n', '    await article.postComment(text);\n')),
+      runGuard(
+        edit(SPEC, '    await envGuard(() => article.postComment(text));\n', '    await article.postComment(text);\n'),
+      ),
       'removes envGuard( calls (old 1, new 0)',
     );
   });
@@ -161,17 +193,21 @@ describe('guard hard-wait check (7)', () => {
   const HARD_WAIT = 'waitForTimeout(';
 
   it('7 hard wait added to a spec, blocked: Edit adding waitForTimeout(', () => {
-    const result = runGuard(edit(SPEC, '    await blog.open();\n', '    await blog.open();\n    await page.waitForTimeout(2000);\n'));
+    const result = runGuard(
+      edit(SPEC, '    await blog.open();\n', '    await blog.open();\n    await page.waitForTimeout(2000);\n'),
+    );
     assertBlocked(result, `${SPEC} would gain ${HARD_WAIT}`, 'Wait for the condition the test actually needs');
   });
 
   it('7 hard wait, allowed: Edit adding a condition-based wait', () => {
-    const newString = "    await blog.open();\n    await page.waitForURL('**/blog');\n    await expect(blog.banner).toBeVisible();\n";
+    const newString =
+      "    await blog.open();\n    await page.waitForURL('**/blog');\n    await expect(blog.banner).toBeVisible();\n";
     assertAllowed(runGuard(edit(SPEC, '    await blog.open();\n', newString)));
   });
 
   it('7 hard wait, Write blocked: waitForTimeout( anywhere in whole spec content', () => {
-    const content = "import { test } from '@playwright/test';\ntest('a', async ({ page }) => {\n  await page.waitForTimeout(500);\n});\n";
+    const content =
+      "import { test } from '@playwright/test';\ntest('a', async ({ page }) => {\n  await page.waitForTimeout(500);\n});\n";
     assertBlocked(runGuard(write(SPEC, content)), `${SPEC} would gain ${HARD_WAIT}`);
   });
 
@@ -182,20 +218,36 @@ describe('guard hard-wait check (7)', () => {
   });
 
   it('7 runs before the removal checks: adding a hard wait while deleting an assertion gets the hard-wait reason', () => {
-    const result = runGuard(edit(SPEC, '    await expect(blog.banner).toBeVisible();\n', '    await page.waitForTimeout(1000);\n'));
+    const result = runGuard(
+      edit(SPEC, '    await expect(blog.banner).toBeVisible();\n', '    await page.waitForTimeout(1000);\n'),
+    );
     assertBlocked(result, `would gain ${HARD_WAIT}`);
   });
 
   it('known limit: waitForTimeout( already in the old text is not reported again', () => {
-    assertAllowed(runGuard(edit(SPEC, '  await page.waitForTimeout(500);\n', '  await page.waitForTimeout(500); // legacy\n')));
+    assertAllowed(
+      runGuard(edit(SPEC, '  await page.waitForTimeout(500);\n', '  await page.waitForTimeout(500); // legacy\n')),
+    );
   });
 
   it('known limit: the hard-wait check covers only *.spec.ts files', () => {
-    assertAllowed(runGuard(edit('pages/BasePage.ts', '  async open() {}\n', '  async open() {\n    await this.page.waitForTimeout(500);\n  }\n')));
+    assertAllowed(
+      runGuard(
+        edit(
+          'pages/BasePage.ts',
+          '  async open() {}\n',
+          '  async open() {\n    await this.page.waitForTimeout(500);\n  }\n',
+        ),
+      ),
+    );
   });
 
   it('known limit: a space before the bracket is not matched (plain substring)', () => {
-    assertAllowed(runGuard(edit(SPEC, '    await blog.open();\n', '    await blog.open();\n    await page.waitForTimeout (500);\n')));
+    assertAllowed(
+      runGuard(
+        edit(SPEC, '    await blog.open();\n', '    await blog.open();\n    await page.waitForTimeout (500);\n'),
+      ),
+    );
   });
 });
 
@@ -222,7 +274,9 @@ describe('guard edge cases', () => {
 
   it('other tools are not examined', () => {
     for (const tool of ['Bash', 'NotebookEdit', 'Read']) {
-      assertAllowed(runGuard(JSON.stringify({ tool_name: tool, tool_input: { file_path: abs('.env'), command: 'echo hi' } })));
+      assertAllowed(
+        runGuard(JSON.stringify({ tool_name: tool, tool_input: { file_path: abs('.env'), command: 'echo hi' } })),
+      );
     }
   });
 
@@ -238,7 +292,10 @@ describe('guard edge cases', () => {
   });
 
   it('.env.example is exempt from the filename check only, not the content check', () => {
-    assertBlocked(runGuard(write('.env.example', `TOKEN=${SAMPLES[0].token}\n`)), 'new text for .env.example looks like a Slack bot token');
+    assertBlocked(
+      runGuard(write('.env.example', `TOKEN=${SAMPLES[0].token}\n`)),
+      'new text for .env.example looks like a Slack bot token',
+    );
   });
 
   it('checks run in order and report one reason: a protected file with secret content gets the filename reason', () => {

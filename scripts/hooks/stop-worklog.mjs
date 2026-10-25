@@ -79,7 +79,7 @@ function hasEntry(rel) {
 function decide() {
   let event;
   try {
-    event = JSON.parse(readFileSync(0, 'utf8').replace(/^﻿+/, ''));
+    event = JSON.parse(readFileSync(0, 'utf8').replace(/^\uFEFF+/, ''));
   } catch {
     return 0; // unreadable or malformed input
   }

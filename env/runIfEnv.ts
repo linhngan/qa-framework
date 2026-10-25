@@ -14,8 +14,5 @@ export function runIfEnv(test: SkippableTest, allowed: readonly AppEnv[]): void 
     throw new Error("runIfEnv allowed environments must be 'dev' or 'prod'.");
   }
   const env = currentEnv();
-  test.skip(
-    !allowed.includes(env),
-    `Skipped: selected env is ${env}; allowed: ${allowed.join(', ')}.`,
-  );
+  test.skip(!allowed.includes(env), `Skipped: selected env is ${env}; allowed: ${allowed.join(', ')}.`);
 }

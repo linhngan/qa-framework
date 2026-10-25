@@ -12,12 +12,24 @@
     "test:prod": "cross-env APP_ENV=prod playwright test",
     "test:list": "cross-env APP_ENV=dev playwright test --list",
     "typecheck": "tsc --noEmit",
-    "test:safety": "node --test \"safety/**/*.test.ts\" \"safety-tests/**/*.test.mjs\""
+    "lint": "eslint --max-warnings=0 .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:safety": "node --test \"safety/**/*.test.ts\" \"safety-tests/**/*.test.mjs\"",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@playwright/test": "1.61.1",
     "@types/node": "^24.19.2",
     "cross-env": "^10.1.0",
-    "typescript": "^7.0.2"
+    "eslint": "10.7.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-playwright": "2.10.5",
+    "husky": "9.1.7",
+    "lint-staged": "17.0.8",
+    "prettier": "3.9.5",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.64.0"
   }
 }

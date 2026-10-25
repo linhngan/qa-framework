@@ -56,8 +56,10 @@ function latestJournal() {
     }
     for (const entry of entries) {
       const child = path.join(rel, entry.name);
-      if (entry.isDirectory()) walk(child); // symbolic links are neither files nor folders here, so they are skipped
-      else if (entry.isFile() && JOURNAL_NAME.test(entry.name)) found.push({ date: entry.name.slice(0, 10), rel: child });
+      if (entry.isDirectory())
+        walk(child); // symbolic links are neither files nor folders here, so they are skipped
+      else if (entry.isFile() && JOURNAL_NAME.test(entry.name))
+        found.push({ date: entry.name.slice(0, 10), rel: child });
     }
   };
   walk(JOURNAL_DIR);

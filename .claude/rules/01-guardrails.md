@@ -42,3 +42,9 @@ Applies to the whole project, always. ⚠️ marks a mistake that our current ch
 - Do: keep isolated checks in `safety/`, run by `npm run test:safety` (`node --test "safety/**/*.test.ts"`). They use no browser, no app URL and no network. Never put them under `tests/`.
 - When: adding or changing safety checks.
 - Check: `npm run test:list` shows only specs from `tests/`. `npm run test:safety` reports its own count, separate from browser tests.
+
+## G7. Never bypass a failing Git hook
+- Do: when the pre-commit or pre-push hook fails, read its message and fix the cause. Never skip it with `--no-verify` (or `-n` on `git commit`) or `HUSKY=0`, and never ask someone else to. `ALLOW_MAIN_PUSH=1` is only for an exceptional, approved push to main (G4), never for course work: weeks reach main by reviewed PRs.
+- When: every `git commit` and `git push`, including fixups and amends.
+- Check: .husky/pre-commit scans staged content for secret files and tokens (G5), then runs lint-staged. .husky/pre-push refuses refs/heads/main, then runs `npm run typecheck` and `npm run test:list`. `npm run test:safety` covers both scripts.
+- ⚠️ Git hooks are local: they run only after `npm install` activates them (`prepare`), and `--no-verify` or `HUSKY=0` skips them silently. Nothing on GitHub repeats these checks yet (no CI).

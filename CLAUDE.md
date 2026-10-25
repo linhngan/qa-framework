@@ -20,7 +20,9 @@ Playwright + TypeScript tests for the Codemify course apps. Setup and background
 - `npm run test:prod` — browser tests on prod (explicit request only)
 - `npm run test:list` — list tests on dev
 - `npm run typecheck` — TypeScript check
+- `npm run lint` — ESLint · `npm run format:check` — Prettier check · `npm run format` — apply Prettier
 - `npm run test:safety` — isolated target/helper checks; no browser, no network
+- Git hooks (.husky/) run on commit and push; never bypass them (G7)
 
 ## Always
 1. No data changes on prod.

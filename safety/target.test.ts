@@ -1,12 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { HELPERS_CHILD, runNode, runScenario, type ChildEnv } from './support/child.ts';
-import {
-  CANONICAL_BASE_URLS,
-  TargetConfigError,
-  resolveTarget,
-  type TargetSettings,
-} from '../env/target.ts';
+import { CANONICAL_BASE_URLS, TargetConfigError, resolveTarget, type TargetSettings } from '../env/target.ts';
 
 const DEV = CANONICAL_BASE_URLS.dev;
 const PROD = CANONICAL_BASE_URLS.prod;

@@ -56,14 +56,19 @@ function changelogFiles() {
 function entries() {
   const files = changelogFiles();
   assert.equal(files.length, 1, `expected one daily log, found ${files.join(', ') || 'none'}`);
-  return readFileSync(path.join(changelogDir(), files[0]), 'utf8').split('\n').filter((l) => l.startsWith('- '));
+  return readFileSync(path.join(changelogDir(), files[0]), 'utf8')
+    .split('\n')
+    .filter((l) => l.startsWith('- '));
 }
 
 function shortHead() {
   return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: project, env, encoding: 'utf8' }).trim();
 }
 
-function entryPattern(rel, { name = 'Test User', branch = 'test-branch', subject = 'init', commit = shortHead() } = {}) {
+function entryPattern(
+  rel,
+  { name = 'Test User', branch = 'test-branch', subject = 'init', commit = shortHead() } = {},
+) {
   const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp(
     `^- ${ENTRY_TIME} · ${esc(name)} @ .+ · ${esc(branch)} · ${esc(rel)} · last commit: ${esc(subject)} · \\*\\*commit:\\*\\* ${esc(commit)}$`,
@@ -96,7 +101,11 @@ describe('vault-sync --from-hook', () => {
   beforeEach(() => makeRepo(project));
 
   it('logs a PostToolUse tool_input.file_path given as a relative path', () => {
-    const result = hook({ hook_event_name: 'PostToolUse', tool_name: 'Edit', tool_input: { file_path: 'tests/a.spec.ts' } });
+    const result = hook({
+      hook_event_name: 'PostToolUse',
+      tool_name: 'Edit',
+      tool_input: { file_path: 'tests/a.spec.ts' },
+    });
     assert.equal(result.status, 0);
     assert.equal(result.stderr, '');
     const lines = entries();
@@ -134,7 +143,15 @@ describe('vault-sync --from-hook', () => {
   });
 
   it('ignores malformed input and missing or non-string paths', () => {
-    for (const input of ['', '{not json', 'null', '{}', '{"tool_input":{}}', '{"tool_input":{"file_path":42}}', '{"file_path":""}']) {
+    for (const input of [
+      '',
+      '{not json',
+      'null',
+      '{}',
+      '{"tool_input":{}}',
+      '{"tool_input":{"file_path":42}}',
+      '{"file_path":""}',
+    ]) {
       const result = hook(input);
       assert.equal(result.status, 0, `exit code for ${JSON.stringify(input)}`);
       assert.equal(result.stderr, '');
@@ -143,7 +160,7 @@ describe('vault-sync --from-hook', () => {
   });
 
   it('removes all leading byte-order marks before parsing', () => {
-    const result = hook(`﻿﻿${JSON.stringify({ tool_input: { file_path: 'tests/bom.spec.ts' } })}`);
+    const result = hook(`\uFEFF\uFEFF${JSON.stringify({ tool_input: { file_path: 'tests/bom.spec.ts' } })}`);
     assert.equal(result.status, 0);
     assert.match(entries()[0], entryPattern('tests/bom.spec.ts'));
   });
@@ -192,7 +209,10 @@ describe('vault-sync without Git information', () => {
   it('uses "unknown" for name, branch and last commit outside a Git repository', () => {
     const result = hook({ tool_input: { file_path: 'notes.md' } });
     assert.equal(result.status, 0);
-    assert.match(entries()[0], entryPattern('notes.md', { name: 'unknown', branch: 'unknown', subject: 'unknown', commit: 'unknown' }));
+    assert.match(
+      entries()[0],
+      entryPattern('notes.md', { name: 'unknown', branch: 'unknown', subject: 'unknown', commit: 'unknown' }),
+    );
   });
 
   it('uses "unknown" for the commit ID in a repository with no commits yet', () => {
@@ -200,7 +220,10 @@ describe('vault-sync without Git information', () => {
     gitIn(project, 'config', 'user.name', 'Test User');
     const result = hook({ tool_input: { file_path: 'notes.md' } });
     assert.equal(result.status, 0);
-    assert.match(entries()[0], entryPattern('notes.md', { branch: 'empty-branch', subject: 'unknown', commit: 'unknown' }));
+    assert.match(
+      entries()[0],
+      entryPattern('notes.md', { branch: 'empty-branch', subject: 'unknown', commit: 'unknown' }),
+    );
   });
 });
 

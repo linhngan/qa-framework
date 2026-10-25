@@ -109,7 +109,7 @@ function decide(event) {
 try {
   let event = null;
   try {
-    event = JSON.parse(readFileSync(0, 'utf8').replace(/^﻿+/, ''));
+    event = JSON.parse(readFileSync(0, 'utf8').replace(/^\uFEFF+/, ''));
   } catch {
     event = null; // malformed or unreadable input: allow silently
   }
