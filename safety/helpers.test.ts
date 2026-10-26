@@ -29,9 +29,7 @@ describe('runIfEnv with a recording fake test', () => {
   it('skips a dev-only test on prod and names both envs in the reason', () => {
     const { skips, error } = runScenario(['run-if-env', '["dev"]'], { APP_ENV: 'prod' });
     assert.equal(error, null);
-    assert.deepEqual(skips, [
-      { condition: true, description: 'Skipped: selected env is prod; allowed: dev.' },
-    ]);
+    assert.deepEqual(skips, [{ condition: true, description: 'Skipped: selected env is prod; allowed: dev.' }]);
   });
 
   it('does not skip a dev-only test on dev', () => {
@@ -64,15 +62,20 @@ describe('runIfEnv inside Playwright (isolated fixture, no browser)', () => {
     skipReasons: string[];
   }
 
-  function collectSpecs(suite: any, specs: SpecResult[] = []): SpecResult[] {
+  // The parts of Playwright's JSON reporter output that these checks read.
+  interface JsonSuite {
+    title: string;
+    specs?: { title: string; tests: { status: string; annotations: { type: string; description?: string }[] }[] }[];
+    suites?: JsonSuite[];
+  }
+
+  function collectSpecs(suite: JsonSuite, specs: SpecResult[] = []): SpecResult[] {
     for (const spec of suite.specs ?? []) {
       const [run] = spec.tests;
       specs.push({
         title: `${suite.title} > ${spec.title}`,
         status: run.status,
-        skipReasons: run.annotations
-          .filter((a: { type: string }) => a.type === 'skip')
-          .map((a: { description?: string }) => a.description ?? ''),
+        skipReasons: run.annotations.filter((a) => a.type === 'skip').map((a) => a.description ?? ''),
       });
     }
     for (const child of suite.suites ?? []) collectSpecs(child, specs);
@@ -85,8 +88,8 @@ describe('runIfEnv inside Playwright (isolated fixture, no browser)', () => {
       encoding: 'utf8',
     });
     assert.equal(result.status, 0, result.stderr || result.stdout);
-    const report = JSON.parse(result.stdout);
-    return report.suites.flatMap((suite: unknown) => collectSpecs(suite));
+    const report = JSON.parse(result.stdout) as { suites: JsonSuite[] };
+    return report.suites.flatMap((suite) => collectSpecs(suite));
   }
 
   it('on dev: runs dev-only and both, skips prod-only with reason', () => {

@@ -1,0 +1,24 @@
+# Prettier owns formatting for code, JSON and YAML. Paths below are left as they are.
+# Keep in step with eslint.config.mjs and lint-staged.config.mjs (Task 08).
+
+# Archived raw drafts: kept unchanged as evidence
+evidence/*-raw-draft.ts
+
+# Supplied course Jira pack
+jira-seed/
+scripts/jira-seed.mjs
+
+# Notes, rules and Claude settings stay byte-identical
+*.md
+vault/
+evidence/
+.claude/
+
+# Generated or local output
+node_modules/
+package-lock.json
+playwright-report/
+test-results/
+blob-report/
+.playwright-mcp/
+.husky/_/

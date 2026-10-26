@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/tsarukoles/agentic-qa-jira-seed/jira-seed.schema.json",
+  "title": "Agentic QA Automation — course backlog seed",
+  "description": "The Jira backlog every student seeds into their own SCRUM space in Week 1. Epics hold tasks; tasks hold TC-* case sub-tasks. courseKey is the key the course material cites; the seeder creates work items in ascending courseKey order so a fresh space reproduces it.",
+  "type": "object",
+  "required": ["version", "project", "epics"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string", "description": "Snapshot date of the source project, YYYY-MM-DD." },
+    "project": {
+      "type": "object",
+      "required": ["key"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string", "pattern": "^[A-Z][A-Z0-9]+$" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["team-managed", "company-managed"] },
+        "template": { "type": "string" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "description": "Where the seed was taken from. Informational.",
+      "additionalProperties": true
+    },
+    "placeholders": {
+      "type": "object",
+      "description": "Numbers below the first courseKey that the seeder burns with throwaway work items so keys line up.",
+      "required": ["count"],
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "why": { "type": "string" }
+      }
+    },
+    "epics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "allOf": [
+          { "$ref": "#/$defs/workItem" },
+          {
+            "properties": {
+              "tasks": { "type": "array", "items": { "$ref": "#/$defs/task" } }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "workItem": {
+      "type": "object",
+      "required": ["courseKey", "summary"],
+      "properties": {
+        "courseKey": { "type": "string", "pattern": "^[A-Z][A-Z0-9]+-[0-9]+$" },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "description": { "type": "string", "description": "Plain text. Blank line = new paragraph; lines starting with '* ' or '- ' become bullets; **bold** is honoured." },
+        "labels": { "type": "array", "items": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+$" }, "uniqueItems": true },
+        "priority": { "type": "string", "enum": ["Highest", "High", "Medium", "Low", "Lowest"] }
+      }
+    },
+    "task": {
+      "allOf": [
+        { "$ref": "#/$defs/workItem" },
+        {
+          "properties": {
+            "tc": { "type": "array", "items": { "type": "string", "pattern": "^TC-[A-Z]+-[0-9]{3}$" }, "description": "The TC-* ids this task covers (from the Covers line)." },
+            "subtasks": { "type": "array", "items": { "$ref": "#/$defs/subtask" } }
+          }
+        }
+      ]
+    },
+    "subtask": {
+      "allOf": [
+        { "$ref": "#/$defs/workItem" },
+        {
+          "required": ["tc"],
+          "properties": {
+            "tc": { "type": "string", "pattern": "^TC-[A-Z]+-[0-9]{3}$", "description": "The single TC-* id this case is; it is also the first token of the summary." }
+          }
+        }
+      ]
+    }
+  }
+}

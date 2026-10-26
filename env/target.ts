@@ -41,9 +41,7 @@ export function resolveTarget(settings: TargetSettings = {}): Target {
 
   const canonical = CANONICAL_BASE_URLS[env];
   if (settings.BASE_URL !== undefined && settings.BASE_URL !== canonical) {
-    throw new TargetConfigError(
-      `BASE_URL does not match the canonical address for ${env}; leave it unset.`,
-    );
+    throw new TargetConfigError(`BASE_URL does not match the canonical address for ${env}; leave it unset.`);
   }
 
   return Object.freeze({ env, baseURL: canonical });
@@ -68,13 +66,9 @@ export function getTarget(): Target {
     pinned = { snapshot, target: resolveTarget(snapshot) };
     return pinned.target;
   }
-  const changed = (Object.keys(snapshot) as (keyof Snapshot)[]).some(
-    (key) => snapshot[key] !== pinned!.snapshot[key],
-  );
+  const changed = (Object.keys(snapshot) as (keyof Snapshot)[]).some((key) => snapshot[key] !== pinned!.snapshot[key]);
   if (changed) {
-    throw new TargetConfigError(
-      'Target changed after it was pinned; start a new process to switch environments.',
-    );
+    throw new TargetConfigError('Target changed after it was pinned; start a new process to switch environments.');
   }
   return pinned.target;
 }

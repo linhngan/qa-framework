@@ -4,7 +4,8 @@
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./**/.auth/**)",
-      "Read(./**/*storageState*.json)"
+      "Read(./**/*storageState*.json)",
+      "Edit(.env*)"
     ],
     "ask": [
       "Bash(git push *)",
@@ -14,7 +15,48 @@
       "Bash(npm test)",
       "Bash(npm run test:list)",
       "Bash(npm run typecheck)",
-      "Bash(npm run test:safety)"
+      "Bash(npm run test:safety)",
+      "Bash(npm run lint)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/hooks/guard.mjs" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/vault-sync.mjs --from-hook" }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/vault-sync.mjs --session-start" },
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/hooks/session-preflight.mjs" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/hooks/stop-worklog.mjs" }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/vault-sync.mjs --session-end", "timeout": 5 }
+        ]
+      }
     ]
   }
 }

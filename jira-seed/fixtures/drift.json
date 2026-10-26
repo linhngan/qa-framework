@@ -1,0 +1,7 @@
+{
+  "//": "Dry-run fixture: the student made and deleted things before seeding, so the counter is already past 5. Expected: no placeholders, a warning, every key differs, a key map is printed (and written on a real run).",
+  "existing": [
+    { "key": "SCRUM-1", "summary": "Task 1", "type": "Task", "parent": null },
+    { "key": "SCRUM-7", "summary": "my own experiment", "type": "Task", "parent": null }
+  ]
+}

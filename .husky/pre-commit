@@ -1,0 +1,9 @@
+# Serial, stopping at the first failure. Never bypass a failure (G7).
+# 1. Task 08: scan the staged content for secret files and tokens.
+# 2. Task 11: refuse unsafe staging of specs and their notes, before anything is written.
+# 3. Task 08: lint and format-check the staged files.
+# 4. Task 11: refresh, stage and check only the selected specs' notes.
+node scripts/git-hooks/scan-staged.mjs || exit 1
+node scripts/git-hooks/spec-notes.mjs precheck || exit 1
+npx --no-install lint-staged || exit 1
+node scripts/git-hooks/spec-notes.mjs refresh
