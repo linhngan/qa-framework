@@ -70,7 +70,9 @@ whoever makes them.
   staged spec, a related note with unstaged edits, an untracked existing note, or a deleted
   or renamed spec whose old note is not yet reviewed. Then lint-staged runs ESLint and a
   Prettier check on the staged files. Last, it refreshes and stages only the staged specs'
-  notes in `vault/tests/`.
+  notes in `vault/tests/`. After Claude edits a spec, its note is already refreshed but not
+  staged, so stage the spec and its refreshed note together; staging the spec alone is
+  refused with "note has unstaged edits".
 - pre-push: refuses any push whose destination is `refs/heads/main`, even
   `git push origin week-2:main`, then runs `npm run typecheck`, `npm run test:list` and
   `npm run vault:validate`. No browser starts.

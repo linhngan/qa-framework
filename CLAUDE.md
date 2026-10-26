@@ -21,7 +21,7 @@ Playwright + TypeScript tests for the Codemify course apps. Setup and background
 - `npm run test:list` — list tests on dev
 - `npm run typecheck` — TypeScript check
 - `npm run lint` — ESLint · `npm run format:check` — Prettier check · `npm run format` — apply Prettier
-- `npm run test:safety` — isolated target/helper checks; no browser, no network
+- `npm run test:safety` — isolated checks (target, helpers, hooks, Git hooks, settings, spec notes); no browser, no network
 - Git hooks (.husky/) run on commit and push; never bypass them (G7)
 
 ## Always
@@ -42,7 +42,7 @@ Details: .claude/rules/01-guardrails.md.
 ## Layout
 - tests/blog/ browser tests · tests/support/ env wrapper, shared users
 - pages/ Page Objects · env/ target, runIfEnv, envGuard
-- safety/ isolated checks (node --test) · evidence/ task notes and raw drafts (not typechecked or run)
+- safety/, safety-tests/ isolated checks (node --test) · evidence/ task notes and raw drafts (not typechecked or run)
 
 ## Not yet in scope
 Database, CI.

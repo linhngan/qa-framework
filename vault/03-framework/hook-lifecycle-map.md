@@ -30,6 +30,11 @@ The three are tracked separately: a configured hook whose script passes its chec
 - 2026-10-25, Task 07: the Stop reminder was seen live at several turn ends, and each retry ended the turn.
 - 2026-10-25, Task 07: added `--session-end` to scripts/vault-sync.mjs. `npm run test:safety`: 118 passed (111 earlier + 7 new). It was then connected as a SessionEnd hook with `timeout: 5`. No END line yet.
 - 2026-10-26, Task 11 stage 1: scripts/vault-sync.mjs gained `--write` and `--check` (spec notes in `vault/tests/`). `--from-hook` now also refreshes the note of an edited supported spec, never staging it and always exiting 0. The settings command did not change. Script-verified by safety-tests/vault-sync.test.mjs. The refresh has **not** been seen live yet: no Claude Edit of a spec happened after the change.
+- 2026-10-26, Week 2 self-review: the unstaged refresh meets the Task 11 pre-commit precheck. Reproduced in a throwaway repository:
+  - after a recorder refresh, committing the spec alone is refused with `note has unstaged edits`;
+  - staging the refreshed note as well passes both precheck and refresh.
+
+  This fails safe and is intended (the precheck cannot tell a refresh from a human edit). The fix is documented in README: stage the spec and its refreshed note together.
 
 ## Hook settings
 

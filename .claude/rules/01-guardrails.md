@@ -39,7 +39,7 @@ Applies to the whole project, always. ⚠️ marks a mistake that our current ch
 - ⚠️ The deny rules cover only Claude's built-in file tools, not shell commands such as `cat .env`, so don't rely on them. The commit scan knows four token patterns only; a secret in another format pasted into a `.ts` or `.md` file still passes.
 
 ## G6. Keep isolated safety checks separate
-- Do: keep isolated checks in `safety/`, run by `npm run test:safety` (`node --test "safety/**/*.test.ts"`). They use no browser, no app URL and no network. Never put them under `tests/`.
+- Do: keep isolated checks in `safety/` (target and helpers, `*.test.ts`) or `safety-tests/` (hooks, Git hooks, settings, spec notes, `*.test.mjs`), run by `npm run test:safety` (`node --test "safety/**/*.test.ts" "safety-tests/**/*.test.mjs"`). They use no browser, no app URL and no network. Never put them under `tests/`.
 - When: adding or changing safety checks.
 - Check: `npm run test:list` shows only specs from `tests/`. `npm run test:safety` reports its own count, separate from browser tests.
 
