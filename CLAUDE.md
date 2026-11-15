@@ -38,11 +38,13 @@ Details: .claude/rules/01-guardrails.md.
 | .claude/rules/10-playwright-pom.md | tests/**/*.ts, pages/**/*.ts |
 | .claude/rules/20-data-management.md | tests/**/*.ts, pages/**/*.ts, scripts/**, jira-seed/** |
 | .claude/rules/30-test-names.md | tests/**/*.spec.ts |
+| .claude/rules/30-db-postgres.md | postgres MCP database checks, always loaded |
 
 ## Layout
 - tests/blog/ browser tests · tests/support/ env wrapper, shared users
 - pages/ Page Objects · env/ target, runIfEnv, envGuard
 - safety/, safety-tests/ isolated checks (node --test) · evidence/ task notes and raw drafts (not typechecked or run)
+- uv-overrides.txt temporary pglast override for the postgres MCP server (rule 30, DB7)
 
 ## Not yet in scope
-Database, CI.
+CI. Database access is read-only through the postgres MCP server (.claude/rules/30-db-postgres.md).
