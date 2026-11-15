@@ -29,7 +29,7 @@ Never treat one layer as proof of another.
   - catalog metadata: schema and table names from `pg_catalog`, filtered to the approved schemas;
   - aggregate counts with a timestamp, for example `SELECT count(*) AS user_count, now() AS counted_at FROM <approved table>;`;
   - role attributes, memberships, ownership and effective grants (DB5).
-- Approved schemas and tables: PENDING the mentor-issued permission matrix. Until it is recorded here, query no application table.
+- Approved tables (DB5 matrix): blog `articles`, `categories`, `comments`; store `products`, `product_variants`, `coupons`, `carts`, `cart_items`, `orders`, `order_items`, `payments`; and `users`. Schema: not stated in the matrix; confirm it from catalog names on the first run, never by guessing.
 - Record a count with its date and time only. Never assert it against a fixed or historical number.
 - Check: review every query before it runs.
 
@@ -47,8 +47,22 @@ Never treat one layer as proof of another.
   - memberships from `pg_auth_members`, and inherited membership with `pg_has_role`;
   - ownership: objects (`pg_class.relowner`), schemas (`pg_namespace.nspowner`) and the database (`pg_database.datdba`) owned by `current_user`;
   - effective grants: `has_database_privilege` (CONNECT, CREATE, TEMP), `has_schema_privilege` (USAGE, CREATE), `has_table_privilege` (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER) and `has_sequence_privilege`, including grants to PUBLIC.
-- If the matrix is missing, or conflicts with a ticket, stop and ask the mentor. Report a mismatch; never "fix" it.
-- Mentor-issued permission matrix: PENDING, not in the repo yet.
+- If the matrix is missing or unclear, stop and ask the mentor. If a Jira ticket says something different, the matrix wins (mentor's instruction). Report a mismatch; never "fix" it.
+- Mentor-issued permission matrix (source: mentor's list as pasted by Ngan Nguyen, recorded 2026-11-16; for Week 3 Task 01 and Task 07). Expected rights, translated to PostgreSQL privileges:
+
+  | Object | Expected | Expected denied |
+  |---|---|---|
+  | Group role | login role is a member of `qa_student` | — |
+  | Blog tables `articles`, `categories`, `comments` | SELECT, INSERT, UPDATE, DELETE | TRUNCATE |
+  | Store tables `products`, `product_variants`, `coupons`, `carts`, `cart_items`, `orders`, `order_items`, `payments` | SELECT, INSERT, UPDATE, DELETE | TRUNCATE |
+  | `users` | SELECT, INSERT | UPDATE, DELETE, TRUNCATE |
+  | Sequences (ID counters) | usable (USAGE) | — |
+  | Table structure | nothing: owns no table, schema or database; no CREATE on the schema | ALTER, DROP, CREATE |
+  | Logins and roles | nothing | CREATEROLE |
+  | Superuser | nothing | SUPERUSER |
+
+  Not stated in the matrix (record as observed, never as a mismatch): schema name, CREATEDB, REPLICATION, BYPASSRLS, connection limit, REFERENCES, TRIGGER, sequence SELECT/UPDATE, database TEMP.
+- ⚠️ The role is expected to hold INSERT, UPDATE and DELETE. The database will not stop a write by Claude; only restricted mode (DB2) and review (DB4, DB6) do.
 - Check: review of the audit table.
 
 ## DB6. Approval
@@ -62,10 +76,11 @@ Never treat one layer as proof of another.
 - Check: review.
 
 ## DB8. Access results record
-- Status on 2026-11-16: NO DATABASE CHECK HAS RUN. The `postgres` tools were not loaded in the session that wrote this rule, and `.claude/settings.local.json` approves only `playwright`. Nothing below is a result.
-- Reviewed access facts (role, attributes, memberships, ownership, grants): PENDING a reviewed run against the mentor-issued matrix (DB5).
+- Status on 2026-11-16: NO DATABASE CHECK HAS RUN. The `postgres` tools were not loaded in the session that wrote this rule, and `.claude/settings.local.json` approves only `playwright`. Nothing below marked Observed or Actual is a result.
+- Expected access facts: recorded in DB5 (matrix, 2026-11-16).
+- Observed access facts (role, attributes, memberships, ownership, grants): PENDING a reviewed run. Record them in an expected-vs-observed table next to DB5.
 - Actual results (`current_user`, approved schema and table names, user count with date and time): PENDING. Record each value with its source (tool and query) and date. No private rows and no credentials.
-- Denied operation: PENDING. Choose one operation the matrix expects to be denied, and explain it from read-only metadata (for example `has_table_privilege(…, 'INSERT')` returning false). Never attempt the operation, and never claim it was blocked when nothing was attempted.
+- Denied operation (guided practice): UPDATE on `users`. Expected: `has_table_privilege(current_user, '<schema>.users', 'UPDATE')` returns false, which means the role has not been granted the right to change existing user rows. Observed: PENDING. This is a metadata read only; never attempt the UPDATE, and never claim it was blocked when nothing was attempted.
 - Limitations:
   - Metadata shows what the role is granted, not what the application allows.
   - Row-level security can hide rows from counts.
