@@ -1,0 +1,2 @@
+# postgres-mcp pins pglast 7.2.0, which PyPI no longer serves; remove this file once a fixed connector release is published.
+pglast==7.21
